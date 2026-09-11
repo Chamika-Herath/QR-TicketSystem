@@ -1,22 +1,14 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
-import InputError from '@/components/InputError.vue';
-import PasskeyVerify from '@/components/PasskeyVerify.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
-import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
+import { Form, Head, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
+import { register } from '@/routes';
 
 defineOptions({
     layout: {
-        title: 'Log in to your account',
-        description: 'Enter your email and password below to log in',
+        title: 'STAFF SIGN IN',
+        description: 'Enter your credentials at the checkout desk to gain system access.',
     },
 });
 
@@ -24,87 +16,96 @@ defineProps<{
     status?: string;
     canResetPassword: boolean;
 }>();
+
+const showPassword = ref(false);
 </script>
 
 <template>
-    <Head title="Log in" />
+    <Head title="Staff Sign In" />
 
-    <div
-        v-if="status"
-        class="mb-4 text-center text-sm font-medium text-green-600"
-    >
+    <div v-if="status" class="p-4 bg-confirmed/10 border border-confirmed/20 text-confirmed rounded-[4px] font-mono text-xs uppercase text-center">
         {{ status }}
     </div>
 
-    <PasskeyVerify />
-
+    <!-- Form component wrapping Laravel Wayfinder actions -->
     <Form
         v-bind="store.form()"
         :reset-on-success="['password']"
         v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
+        class="space-y-6 text-ink font-body"
     >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
-                <Label for="email">Email address</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    required
-                    autofocus
-                    :tabindex="1"
-                    autocomplete="email"
-                    placeholder="email@example.com"
-                />
-                <InputError :message="errors.email" />
-            </div>
-
-            <div class="grid gap-2">
-                <div class="flex items-center justify-between">
-                    <Label for="password">Password</Label>
-                    <TextLink
-                        v-if="canResetPassword"
-                        :href="request()"
-                        class="text-sm"
-                        :tabindex="5"
-                    >
-                        Forgot your password?
-                    </TextLink>
-                </div>
-                <PasswordInput
-                    id="password"
-                    name="password"
-                    required
-                    :tabindex="2"
-                    autocomplete="current-password"
-                    placeholder="Password"
-                />
-                <InputError :message="errors.password" />
-            </div>
-
-            <div class="flex items-center justify-between">
-                <Label for="remember" class="flex items-center space-x-3">
-                    <Checkbox id="remember" name="remember" :tabindex="3" />
-                    <span>Remember me</span>
-                </Label>
-            </div>
-
-            <Button
-                type="submit"
-                class="mt-4 w-full"
-                :tabindex="4"
-                :disabled="processing"
-                data-test="login-button"
-            >
-                <Spinner v-if="processing" />
-                Log in
-            </Button>
+        <div>
+            <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">EMAIL ADDRESS</label>
+            <input 
+                id="email"
+                type="email" 
+                name="email"
+                required
+                autofocus
+                placeholder="EMAIL@EXAMPLE.COM"
+                class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink placeholder-muted/60 focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp transition"
+            />
+            <p v-if="errors.email" class="mt-2 font-mono text-xs text-stamp uppercase">{{ errors.email }}</p>
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <label class="font-mono text-[10px] uppercase tracking-wider text-muted">PASSWORD</label>
+                <Link
+                    v-if="canResetPassword"
+                    :href="request()"
+                    class="font-mono text-[10px] uppercase text-stamp hover:text-ink transition-colors"
+                >
+                    FORGOT PASSWORD?
+                </Link>
+            </div>
+            
+            <div class="relative">
+                <input 
+                    id="password"
+                    :type="showPassword ? 'text' : 'password'"
+                    name="password"
+                    required
+                    placeholder="PASSWORD"
+                    class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 pr-10 text-sm text-ink placeholder-muted/60 focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp transition"
+                />
+                <button
+                    type="button"
+                    @click="showPassword = !showPassword"
+                    class="absolute inset-y-0 right-0 flex items-center px-3 text-muted hover:text-ink focus:outline-none"
+                >
+                    <span class="font-mono text-[10px] uppercase tracking-tighter">
+                        {{ showPassword ? 'HIDE' : 'SHOW' }}
+                    </span>
+                </button>
+            </div>
+            <p v-if="errors.password" class="mt-2 font-mono text-xs text-stamp uppercase">{{ errors.password }}</p>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <label for="remember" class="flex items-center gap-2 cursor-pointer select-none">
+                <input 
+                    id="remember" 
+                    type="checkbox" 
+                    name="remember" 
+                    class="rounded-[4px] border-stub-line text-stamp focus:ring-stamp bg-paper h-4 w-4"
+                />
+                <span class="font-mono text-[10px] uppercase text-muted">REMEMBER ME</span>
+            </label>
+        </div>
+
+        <button 
+            type="submit" 
+            :disabled="processing"
+            class="w-full py-4 px-6 rounded-[4px] font-mono text-xs uppercase tracking-widest bg-stamp hover:bg-ink text-paper transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+            <span v-if="processing" class="w-4 h-4 border-2 border-paper border-t-transparent rounded-full animate-spin"></span>
+            {{ processing ? 'ACCESS DESK' : 'ACCESS DESK' }}
+        </button>
+
+        <div class="text-center font-mono text-[10px] uppercase pt-2 border-t border-dashed border-stub-line">
             Don't have an account?
-            <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
+            <Link :href="register()" class="text-stamp hover:text-ink transition-colors ml-1 font-bold">Sign up</Link>
         </div>
     </Form>
 </template>

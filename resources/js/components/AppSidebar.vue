@@ -1,66 +1,97 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from '@lucide/vue';
-import AppLogo from '@/components/AppLogo.vue';
-import NavFooter from '@/components/NavFooter.vue';
-import NavMain from '@/components/NavMain.vue';
-import NavUser from '@/components/NavUser.vue';
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-} from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import type { NavItem } from '@/types';
+import { Link, usePage, router } from '@inertiajs/vue3';
+import { logout } from '@/routes';
 
-const mainNavItems: NavItem[] = [
+const page = usePage();
+
+const mainNavItems = [
     {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+        title: 'DASHBOARD',
+        href: '/dashboard',
+        icon: '📊',
+    },
+    {
+        title: 'EVENTS',
+        href: '/events',
+        icon: '🎟️',
+    },
+    {
+        title: 'SCANNER',
+        href: '/scanner',
+        icon: '📷',
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
-];
+const handleLogout = () => {
+    router.flushAll();
+};
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
-                            <AppLogo />
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-        </SidebarHeader>
+    <aside class="w-64 bg-paper border-r border-stub-line flex flex-col justify-between h-screen sticky top-0 font-body select-none">
+        
+        <!-- Header / Logo -->
+        <div class="p-6 border-b border-dashed border-stub-line">
+            <Link href="/dashboard" class="flex flex-col gap-1">
+                <span class="font-display text-2xl uppercase tracking-wider text-stamp">
+                    TICKET // COUNTER
+                </span>
+                <span class="font-mono text-[9px] uppercase tracking-widest text-muted">
+                    ENTRY OPERATIONS
+                </span>
+            </Link>
+        </div>
 
-        <SidebarContent>
-            <NavMain :items="mainNavItems" />
-        </SidebarContent>
+        <!-- Navigation Links -->
+        <div class="flex-1 py-8 px-4 space-y-2">
+            <Link
+                v-for="item in mainNavItems"
+                :key="item.title"
+                :href="item.href"
+                class="flex items-center gap-3 px-4 py-3 rounded-[4px] font-mono text-xs uppercase tracking-wider hover:bg-stamp/10 hover:text-stamp transition-colors duration-150"
+                :class="[
+                    $page.url.startsWith(item.href) ? 'bg-stamp text-paper hover:bg-stamp hover:text-paper' : 'text-ink'
+                ]"
+            >
+                <span>{{ item.icon }}</span>
+                <span>{{ item.title }}</span>
+            </Link>
 
-        <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
-            <NavUser />
-        </SidebarFooter>
-    </Sidebar>
-    <slot />
+            <!-- Admin-only User Management link -->
+            <Link
+                v-if="page.props.auth?.user?.role === 'admin'"
+                href="/users"
+                class="flex items-center gap-3 px-4 py-3 rounded-[4px] font-mono text-xs uppercase tracking-wider hover:bg-stamp/10 hover:text-stamp transition-colors duration-150"
+                :class="[
+                    $page.url.startsWith('/users') ? 'bg-stamp text-paper hover:bg-stamp hover:text-paper' : 'text-ink'
+                ]"
+            >
+                <span>👥</span>
+                <span>USERS</span>
+            </Link>
+        </div>
+
+        <!-- Footer / User profile & logout -->
+        <div class="p-6 border-t border-dashed border-stub-line space-y-4">
+            <div class="flex flex-col">
+                <span class="font-display text-base uppercase text-ink truncate">
+                    {{ page.props.auth?.user?.name }}
+                </span>
+                <span class="font-mono text-[9px] uppercase text-muted tracking-wider truncate">
+                    ROLE: {{ page.props.auth?.user?.role }}
+                </span>
+            </div>
+
+            <Link
+                :href="logout()"
+                @click="handleLogout"
+                as="button"
+                method="post"
+                class="w-full text-left font-mono text-[10px] uppercase text-stamp hover:text-ink transition-colors focus:outline-none block pt-2 border-t border-stub-line"
+            >
+                [ LEAVE COUNTER &rarr; ]
+            </Link>
+        </div>
+
+    </aside>
 </template>
