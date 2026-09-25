@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\AdminEventController::attendees
-* @see app/Http/Controllers/AdminEventController.php:160
+* @see app/Http/Controllers/AdminEventController.php:200
 * @route '/events/{event}/attendees'
 */
 export const attendees = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ attendees.definition = {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::attendees
-* @see app/Http/Controllers/AdminEventController.php:160
+* @see app/Http/Controllers/AdminEventController.php:200
 * @route '/events/{event}/attendees'
 */
 attendees.url = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ attendees.url = (args: { event: number | { id: number } } | [event: number | { i
 
 /**
 * @see \App\Http\Controllers\AdminEventController::attendees
-* @see app/Http/Controllers/AdminEventController.php:160
+* @see app/Http/Controllers/AdminEventController.php:200
 * @route '/events/{event}/attendees'
 */
 attendees.get = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -59,7 +59,7 @@ attendees.get = (args: { event: number | { id: number } } | [event: number | { i
 
 /**
 * @see \App\Http\Controllers\AdminEventController::attendees
-* @see app/Http/Controllers/AdminEventController.php:160
+* @see app/Http/Controllers/AdminEventController.php:200
 * @route '/events/{event}/attendees'
 */
 attendees.head = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -69,7 +69,7 @@ attendees.head = (args: { event: number | { id: number } } | [event: number | { 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::attendees
-* @see app/Http/Controllers/AdminEventController.php:160
+* @see app/Http/Controllers/AdminEventController.php:200
 * @route '/events/{event}/attendees'
 */
 const attendeesForm = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -79,7 +79,7 @@ const attendeesForm = (args: { event: number | { id: number } } | [event: number
 
 /**
 * @see \App\Http\Controllers\AdminEventController::attendees
-* @see app/Http/Controllers/AdminEventController.php:160
+* @see app/Http/Controllers/AdminEventController.php:200
 * @route '/events/{event}/attendees'
 */
 attendeesForm.get = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -89,7 +89,7 @@ attendeesForm.get = (args: { event: number | { id: number } } | [event: number |
 
 /**
 * @see \App\Http\Controllers\AdminEventController::attendees
-* @see app/Http/Controllers/AdminEventController.php:160
+* @see app/Http/Controllers/AdminEventController.php:200
 * @route '/events/{event}/attendees'
 */
 attendeesForm.head = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -106,7 +106,7 @@ attendees.form = attendeesForm
 
 /**
 * @see \App\Http\Controllers\AdminEventController::manualCheckin
-* @see app/Http/Controllers/AdminEventController.php:190
+* @see app/Http/Controllers/AdminEventController.php:234
 * @route '/events/{event}/attendees/{attendee}/manual-checkin'
 */
 export const manualCheckin = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -121,7 +121,7 @@ manualCheckin.definition = {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::manualCheckin
-* @see app/Http/Controllers/AdminEventController.php:190
+* @see app/Http/Controllers/AdminEventController.php:234
 * @route '/events/{event}/attendees/{attendee}/manual-checkin'
 */
 manualCheckin.url = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions) => {
@@ -151,7 +151,7 @@ manualCheckin.url = (args: { event: number | { id: number }, attendee: number | 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::manualCheckin
-* @see app/Http/Controllers/AdminEventController.php:190
+* @see app/Http/Controllers/AdminEventController.php:234
 * @route '/events/{event}/attendees/{attendee}/manual-checkin'
 */
 manualCheckin.post = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -161,7 +161,7 @@ manualCheckin.post = (args: { event: number | { id: number }, attendee: number |
 
 /**
 * @see \App\Http\Controllers\AdminEventController::manualCheckin
-* @see app/Http/Controllers/AdminEventController.php:190
+* @see app/Http/Controllers/AdminEventController.php:234
 * @route '/events/{event}/attendees/{attendee}/manual-checkin'
 */
 const manualCheckinForm = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -171,7 +171,7 @@ const manualCheckinForm = (args: { event: number | { id: number }, attendee: num
 
 /**
 * @see \App\Http\Controllers\AdminEventController::manualCheckin
-* @see app/Http/Controllers/AdminEventController.php:190
+* @see app/Http/Controllers/AdminEventController.php:234
 * @route '/events/{event}/attendees/{attendee}/manual-checkin'
 */
 manualCheckinForm.post = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -183,7 +183,7 @@ manualCheckin.form = manualCheckinForm
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:218
+* @see app/Http/Controllers/AdminEventController.php:266
 * @route '/events/{event}/export'
 */
 export const exportMethod = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -198,7 +198,7 @@ exportMethod.definition = {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:218
+* @see app/Http/Controllers/AdminEventController.php:266
 * @route '/events/{event}/export'
 */
 exportMethod.url = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -231,7 +231,7 @@ exportMethod.url = (args: { event: number | { id: number } } | [event: number | 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:218
+* @see app/Http/Controllers/AdminEventController.php:266
 * @route '/events/{event}/export'
 */
 exportMethod.get = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -241,7 +241,7 @@ exportMethod.get = (args: { event: number | { id: number } } | [event: number | 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:218
+* @see app/Http/Controllers/AdminEventController.php:266
 * @route '/events/{event}/export'
 */
 exportMethod.head = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -251,7 +251,7 @@ exportMethod.head = (args: { event: number | { id: number } } | [event: number |
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:218
+* @see app/Http/Controllers/AdminEventController.php:266
 * @route '/events/{event}/export'
 */
 const exportMethodForm = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -261,7 +261,7 @@ const exportMethodForm = (args: { event: number | { id: number } } | [event: num
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:218
+* @see app/Http/Controllers/AdminEventController.php:266
 * @route '/events/{event}/export'
 */
 exportMethodForm.get = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -271,7 +271,7 @@ exportMethodForm.get = (args: { event: number | { id: number } } | [event: numbe
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:218
+* @see app/Http/Controllers/AdminEventController.php:266
 * @route '/events/{event}/export'
 */
 exportMethodForm.head = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -288,7 +288,7 @@ exportMethod.form = exportMethodForm
 
 /**
 * @see \App\Http\Controllers\AdminEventController::store
-* @see app/Http/Controllers/AdminEventController.php:38
+* @see app/Http/Controllers/AdminEventController.php:40
 * @route '/events'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -303,7 +303,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::store
-* @see app/Http/Controllers/AdminEventController.php:38
+* @see app/Http/Controllers/AdminEventController.php:40
 * @route '/events'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -312,7 +312,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::store
-* @see app/Http/Controllers/AdminEventController.php:38
+* @see app/Http/Controllers/AdminEventController.php:40
 * @route '/events'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -322,7 +322,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\AdminEventController::store
-* @see app/Http/Controllers/AdminEventController.php:38
+* @see app/Http/Controllers/AdminEventController.php:40
 * @route '/events'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -332,7 +332,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::store
-* @see app/Http/Controllers/AdminEventController.php:38
+* @see app/Http/Controllers/AdminEventController.php:40
 * @route '/events'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -344,7 +344,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\AdminEventController::update
-* @see app/Http/Controllers/AdminEventController.php:94
+* @see app/Http/Controllers/AdminEventController.php:108
 * @route '/events/{event}'
 */
 export const update = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -359,7 +359,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::update
-* @see app/Http/Controllers/AdminEventController.php:94
+* @see app/Http/Controllers/AdminEventController.php:108
 * @route '/events/{event}'
 */
 update.url = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -392,7 +392,7 @@ update.url = (args: { event: number | { id: number } } | [event: number | { id: 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::update
-* @see app/Http/Controllers/AdminEventController.php:94
+* @see app/Http/Controllers/AdminEventController.php:108
 * @route '/events/{event}'
 */
 update.put = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -402,7 +402,7 @@ update.put = (args: { event: number | { id: number } } | [event: number | { id: 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::update
-* @see app/Http/Controllers/AdminEventController.php:94
+* @see app/Http/Controllers/AdminEventController.php:108
 * @route '/events/{event}'
 */
 const updateForm = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -417,7 +417,7 @@ const updateForm = (args: { event: number | { id: number } } | [event: number | 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::update
-* @see app/Http/Controllers/AdminEventController.php:94
+* @see app/Http/Controllers/AdminEventController.php:108
 * @route '/events/{event}'
 */
 updateForm.put = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -433,8 +433,98 @@ updateForm.put = (args: { event: number | { id: number } } | [event: number | { 
 update.form = updateForm
 
 /**
+* @see \App\Http\Controllers\AdminEventController::toggleStatus
+* @see app/Http/Controllers/AdminEventController.php:168
+* @route '/events/{event}/status'
+*/
+export const toggleStatus = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: toggleStatus.url(args, options),
+    method: 'patch',
+})
+
+toggleStatus.definition = {
+    methods: ["patch"],
+    url: '/events/{event}/status',
+} satisfies RouteDefinition<["patch"]>
+
+/**
+* @see \App\Http\Controllers\AdminEventController::toggleStatus
+* @see app/Http/Controllers/AdminEventController.php:168
+* @route '/events/{event}/status'
+*/
+toggleStatus.url = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { event: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { event: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            event: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        event: typeof args.event === 'object'
+        ? args.event.id
+        : args.event,
+    }
+
+    return toggleStatus.definition.url
+            .replace('{event}', parsedArgs.event.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\AdminEventController::toggleStatus
+* @see app/Http/Controllers/AdminEventController.php:168
+* @route '/events/{event}/status'
+*/
+toggleStatus.patch = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: toggleStatus.url(args, options),
+    method: 'patch',
+})
+
+/**
+* @see \App\Http\Controllers\AdminEventController::toggleStatus
+* @see app/Http/Controllers/AdminEventController.php:168
+* @route '/events/{event}/status'
+*/
+const toggleStatusForm = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: toggleStatus.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PATCH',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AdminEventController::toggleStatus
+* @see app/Http/Controllers/AdminEventController.php:168
+* @route '/events/{event}/status'
+*/
+toggleStatusForm.patch = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: toggleStatus.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PATCH',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+toggleStatus.form = toggleStatusForm
+
+/**
 * @see \App\Http\Controllers\AdminEventController::destroy
-* @see app/Http/Controllers/AdminEventController.php:144
+* @see app/Http/Controllers/AdminEventController.php:184
 * @route '/events/{event}'
 */
 export const destroy = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -449,7 +539,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroy
-* @see app/Http/Controllers/AdminEventController.php:144
+* @see app/Http/Controllers/AdminEventController.php:184
 * @route '/events/{event}'
 */
 destroy.url = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -482,7 +572,7 @@ destroy.url = (args: { event: number | { id: number } } | [event: number | { id:
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroy
-* @see app/Http/Controllers/AdminEventController.php:144
+* @see app/Http/Controllers/AdminEventController.php:184
 * @route '/events/{event}'
 */
 destroy.delete = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -492,7 +582,7 @@ destroy.delete = (args: { event: number | { id: number } } | [event: number | { 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroy
-* @see app/Http/Controllers/AdminEventController.php:144
+* @see app/Http/Controllers/AdminEventController.php:184
 * @route '/events/{event}'
 */
 const destroyForm = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -507,7 +597,7 @@ const destroyForm = (args: { event: number | { id: number } } | [event: number |
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroy
-* @see app/Http/Controllers/AdminEventController.php:144
+* @see app/Http/Controllers/AdminEventController.php:184
 * @route '/events/{event}'
 */
 destroyForm.delete = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -525,6 +615,7 @@ destroy.form = destroyForm
 const events = {
     store: Object.assign(store, store),
     update: Object.assign(update, update),
+    toggleStatus: Object.assign(toggleStatus, toggleStatus),
     destroy: Object.assign(destroy, destroy),
 }
 

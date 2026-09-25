@@ -17,6 +17,7 @@ class Ticket extends Model
         'qr_image_path',
         'ticket_image_path',
         'ticket_type',
+        'price',
         'seat_number',
         'status',
     ];

@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head, useForm, router, usePage, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { ref } from 'vue';
+
+const page = usePage();
+const currentUserRole = page.props.auth?.user?.role || 'staff';
 
 const props = defineProps<{
     users: {
@@ -10,10 +13,16 @@ const props = defineProps<{
             name: string;
             email: string;
             role: string;
+            creator: { name: string } | null;
             allowed_event_limit: number;
+            allowed_ticket_limit: number;
         }>;
         links: Array<any>;
     };
+    manager?: {
+        id: number;
+        name: string;
+    } | null;
 }>();
 
 const isCreateOpen = ref(false);
@@ -22,20 +31,28 @@ const editingUser = ref<any>(null);
 const form = useForm({
     name: '',
     email: '',
-    role: 'staff',
+    role: currentUserRole === 'admin' && !props.manager ? 'staff' : 'scanner',
     allowed_event_limit: 5,
+    allowed_ticket_limit: 100,
     password: '',
 });
 
 const editForm = useForm({
     name: '',
     email: '',
-    role: 'staff',
+    role: currentUserRole === 'admin' ? 'staff' : 'scanner',
     allowed_event_limit: 5,
+    allowed_ticket_limit: 100,
     password: '',
 });
 
 const submitCreate = () => {
+    if (props.manager && currentUserRole === 'admin') {
+        // If creating a scanner under a specific manager as admin, wait, we can't easily set created_by unless we pass it to the backend. 
+        // Admin currently sets themselves as created_by. We'd have to alter store method.
+        // For simplicity, if we are in manager view, maybe hide create operator or allow it.
+        // Actually, let's let backend handle it or hide create button.
+    }
     form.post('/users', {
         onSuccess: () => {
             isCreateOpen.value = false;
@@ -59,6 +76,7 @@ const editUser = (user: any) => {
     editForm.email = user.email;
     editForm.role = user.role;
     editForm.allowed_event_limit = user.allowed_event_limit;
+    editForm.allowed_ticket_limit = user.allowed_ticket_limit;
     editForm.password = '';
 };
 
@@ -81,13 +99,30 @@ const deleteUser = (id: number) => {
                 <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-background rounded-full border border-stub-line"></div>
                 
                 <div>
-                    <span class="font-mono text-xs uppercase text-stamp tracking-widest bg-stamp/10 px-3 py-1 rounded">
-                        ADMIN DESK
-                    </span>
-                    <h1 class="font-display text-4xl uppercase tracking-wider text-ink mt-2">USER MANAGEMENT</h1>
-                    <p class="font-body text-xs text-muted">Create operator accounts and allocate event creation limits.</p>
+                    <div class="flex items-center gap-4">
+                        <Link 
+                            v-if="manager" 
+                            href="/users" 
+                            class="font-mono text-[10px] uppercase text-stamp hover:text-ink transition border border-stub-line px-2 py-1 rounded"
+                        >
+                            &larr; Back
+                        </Link>
+                        <span class="font-mono text-xs uppercase text-stamp tracking-widest bg-stamp/10 px-3 py-1 rounded">
+                            ADMIN DESK
+                        </span>
+                    </div>
+                    <h1 class="font-display text-4xl uppercase tracking-wider text-ink mt-2">
+                        <template v-if="$page.props.auth.user.role === 'admin' && !manager">USER MANAGEMENT</template>
+                        <template v-else-if="manager">SCANNERS FOR {{ manager.name }}</template>
+                        <template v-else>SCANNER MANAGEMENT</template>
+                    </h1>
+                    <p class="font-body text-xs text-muted">
+                        <template v-if="$page.props.auth.user.role === 'admin' && !manager">Create operator accounts and allocate event creation limits.</template>
+                        <template v-else>Manage ticket scanning staff.</template>
+                    </p>
                 </div>
                 <button 
+                    v-if="!manager"
                     @click="isCreateOpen = !isCreateOpen; editingUser = null"
                     class="bg-stamp hover:bg-ink text-paper font-mono text-xs uppercase px-5 py-3 rounded-[4px] tracking-wider transition-colors duration-150"
                 >
@@ -117,19 +152,26 @@ const deleteUser = (id: number) => {
                         <p v-if="form.errors.password" class="font-mono text-xs text-stamp uppercase mt-1">{{ form.errors.password }}</p>
                     </div>
 
-                    <div>
+                    <div v-if="$page.props.auth.user.role === 'admin'">
                         <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">ROLE</label>
                         <select v-model="form.role" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp">
-                            <option value="staff">STAFF SCANNER</option>
-                            <option value="admin">ADMINISTRATOR</option>
+                            <option value="scanner">TICKET SCANNER</option>
+                            <option v-if="$page.props.auth.user.role === 'admin'" value="staff">STAFF OPERATOR</option>
+                            <option v-if="$page.props.auth.user.role === 'admin'" value="admin">ADMINISTRATOR</option>
                         </select>
                         <p v-if="form.errors.role" class="font-mono text-xs text-stamp uppercase mt-1">{{ form.errors.role }}</p>
                     </div>
 
-                    <div>
+                    <div v-if="$page.props.auth.user.role === 'admin'">
                         <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">EVENT CREATION LIMIT</label>
                         <input v-model="form.allowed_event_limit" type="number" min="0" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" />
                         <p v-if="form.errors.allowed_event_limit" class="font-mono text-xs text-stamp uppercase mt-1">{{ form.errors.allowed_event_limit }}</p>
+                    </div>
+
+                    <div v-if="$page.props.auth.user.role === 'admin'">
+                        <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">TICKET ISSUANCE LIMIT</label>
+                        <input v-model="form.allowed_ticket_limit" type="number" min="0" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" />
+                        <p v-if="form.errors.allowed_ticket_limit" class="font-mono text-xs text-stamp uppercase mt-1">{{ form.errors.allowed_ticket_limit }}</p>
                     </div>
 
                     <div class="md:col-span-2 flex justify-end gap-4 border-t border-dashed border-stub-line pt-6">
@@ -161,19 +203,26 @@ const deleteUser = (id: number) => {
                         <p v-if="editForm.errors.password" class="font-mono text-xs text-stamp uppercase mt-1">{{ editForm.errors.password }}</p>
                     </div>
 
-                    <div>
+                    <div v-if="$page.props.auth.user.role === 'admin'">
                         <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">ROLE</label>
                         <select v-model="editForm.role" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp">
-                            <option value="staff">STAFF SCANNER</option>
-                            <option value="admin">ADMINISTRATOR</option>
+                            <option value="scanner">TICKET SCANNER</option>
+                            <option v-if="$page.props.auth.user.role === 'admin'" value="staff">STAFF OPERATOR</option>
+                            <option v-if="$page.props.auth.user.role === 'admin'" value="admin">ADMINISTRATOR</option>
                         </select>
                         <p v-if="editForm.errors.role" class="font-mono text-xs text-stamp uppercase mt-1">{{ editForm.errors.role }}</p>
                     </div>
 
-                    <div>
+                    <div v-if="$page.props.auth.user.role === 'admin'">
                         <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">EVENT CREATION LIMIT</label>
                         <input v-model="editForm.allowed_event_limit" type="number" min="0" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" />
                         <p v-if="editForm.errors.allowed_event_limit" class="font-mono text-xs text-stamp uppercase mt-1">{{ editForm.errors.allowed_event_limit }}</p>
+                    </div>
+
+                    <div v-if="$page.props.auth.user.role === 'admin'">
+                        <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">TICKET ISSUANCE LIMIT</label>
+                        <input v-model="editForm.allowed_ticket_limit" type="number" min="0" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" />
+                        <p v-if="editForm.errors.allowed_ticket_limit" class="font-mono text-xs text-stamp uppercase mt-1">{{ editForm.errors.allowed_ticket_limit }}</p>
                     </div>
 
                     <div class="md:col-span-2 flex justify-end gap-4 border-t border-dashed border-stub-line pt-6">
@@ -184,14 +233,16 @@ const deleteUser = (id: number) => {
             </div>
 
             <!-- Operators Table -->
-            <div class="bg-paper border border-stub-line rounded-lg overflow-hidden">
-                <table class="w-full text-left border-collapse">
+            <div class="bg-paper border border-stub-line rounded-lg overflow-x-auto">
+                <table class="w-full text-left border-collapse whitespace-nowrap md:whitespace-normal">
                     <thead>
                         <tr class="font-mono text-[10px] uppercase text-muted tracking-wider border-b border-stub-line">
                             <th class="p-4">Name</th>
                             <th class="p-4">Email</th>
-                            <th class="p-4">Role</th>
-                            <th class="p-4">Allowed Events</th>
+                            <th class="p-4" v-if="$page.props.auth.user.role === 'admin'">Role</th>
+                            <th class="p-4" v-if="$page.props.auth.user.role === 'admin'">Manager</th>
+                            <th class="p-4" v-if="$page.props.auth.user.role === 'admin'">Allowed Events</th>
+                            <th class="p-4" v-if="$page.props.auth.user.role === 'admin'">Ticket Limit</th>
                             <th class="p-4 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -199,7 +250,7 @@ const deleteUser = (id: number) => {
                         <tr v-for="user in users.data" :key="user.id" class="hover:bg-paper/40 transition">
                             <td class="p-4 font-semibold text-sm">{{ user.name.toUpperCase() }}</td>
                             <td class="p-4 text-xs text-ink">{{ user.email.toUpperCase() }}</td>
-                            <td class="p-4">
+                            <td class="p-4" v-if="$page.props.auth.user.role === 'admin'">
                                 <span :class="[
                                     'px-2.5 py-0.5 rounded-[4px] font-mono text-[9px] uppercase tracking-wider border',
                                     user.role === 'admin' ? 'bg-confirmed/10 text-confirmed border-confirmed/20' : 'bg-stamp/10 text-stamp border-stamp/20'
@@ -207,10 +258,23 @@ const deleteUser = (id: number) => {
                                     {{ user.role }}
                                 </span>
                             </td>
-                            <td class="p-4 font-mono text-xs">
+                            <td class="p-4 text-xs text-muted" v-if="$page.props.auth.user.role === 'admin'">
+                                {{ user.creator ? user.creator.name.toUpperCase() : 'SYSTEM ADMIN' }}
+                            </td>
+                            <td class="p-4 font-mono text-xs" v-if="$page.props.auth.user.role === 'admin'">
                                 {{ user.role === 'admin' ? 'UNLIMITED' : user.allowed_event_limit }}
                             </td>
+                            <td class="p-4 font-mono text-xs" v-if="$page.props.auth.user.role === 'admin'">
+                                {{ user.role === 'admin' ? 'UNLIMITED' : user.allowed_ticket_limit }}
+                            </td>
                             <td class="p-4 text-right flex items-center justify-end gap-3">
+                                <Link 
+                                    v-if="user.role === 'staff' && $page.props.auth.user.role === 'admin' && !manager"
+                                    :href="`/users?manager_id=${user.id}`"
+                                    class="font-mono text-[10px] uppercase border border-stub-line hover:border-ink hover:text-ink text-muted px-3 py-1.5 rounded-[4px] transition"
+                                >
+                                    Scanners
+                                </Link>
                                 <button 
                                     @click="editUser(user)"
                                     class="font-mono text-[10px] uppercase border border-stub-line hover:border-ink hover:text-ink text-muted px-3 py-1.5 rounded-[4px] transition"

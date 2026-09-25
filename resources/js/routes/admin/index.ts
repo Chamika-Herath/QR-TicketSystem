@@ -163,9 +163,91 @@ usersForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 users.form = usersForm
 
+/**
+* @see \App\Http\Controllers\IncomeController::income
+* @see app/Http/Controllers/IncomeController.php:12
+* @route '/income'
+*/
+export const income = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: income.url(options),
+    method: 'get',
+})
+
+income.definition = {
+    methods: ["get","head"],
+    url: '/income',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\IncomeController::income
+* @see app/Http/Controllers/IncomeController.php:12
+* @route '/income'
+*/
+income.url = (options?: RouteQueryOptions) => {
+    return income.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\IncomeController::income
+* @see app/Http/Controllers/IncomeController.php:12
+* @route '/income'
+*/
+income.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: income.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\IncomeController::income
+* @see app/Http/Controllers/IncomeController.php:12
+* @route '/income'
+*/
+income.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: income.url(options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\IncomeController::income
+* @see app/Http/Controllers/IncomeController.php:12
+* @route '/income'
+*/
+const incomeForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: income.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\IncomeController::income
+* @see app/Http/Controllers/IncomeController.php:12
+* @route '/income'
+*/
+incomeForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: income.url(options),
+    method: 'get',
+})
+
+/**
+* @see \App\Http\Controllers\IncomeController::income
+* @see app/Http/Controllers/IncomeController.php:12
+* @route '/income'
+*/
+incomeForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    action: income.url({
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'HEAD',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'get',
+})
+
+income.form = incomeForm
+
 const admin = {
     events: Object.assign(events, events735790),
     users: Object.assign(users, users48860f),
+    income: Object.assign(income, income),
 }
 
 export default admin

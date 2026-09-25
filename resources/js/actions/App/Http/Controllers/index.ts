@@ -3,6 +3,7 @@ import DashboardController from './DashboardController'
 import CheckInController from './CheckInController'
 import AdminEventController from './AdminEventController'
 import UserController from './UserController'
+import IncomeController from './IncomeController'
 import Settings from './Settings'
 
 const Controllers = {
@@ -11,6 +12,7 @@ const Controllers = {
     CheckInController: Object.assign(CheckInController, CheckInController),
     AdminEventController: Object.assign(AdminEventController, AdminEventController),
     UserController: Object.assign(UserController, UserController),
+    IncomeController: Object.assign(IncomeController, IncomeController),
     Settings: Object.assign(Settings, Settings),
 }
 

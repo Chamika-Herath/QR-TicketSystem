@@ -87,6 +87,7 @@ class PublicEventController extends Controller
             'attendee_id' => $attendee->id,
             'token' => $token,
             'ticket_type' => $chosenType,
+            'price' => $categoryConfig ? ($categoryConfig['price'] ?? 0) : 0,
             'seat_number' => $seatNumber,
             'status' => 'issued',
         ]);

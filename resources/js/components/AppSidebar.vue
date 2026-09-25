@@ -3,6 +3,7 @@ import { Link, usePage, router } from '@inertiajs/vue3';
 import { logout } from '@/routes';
 
 const page = usePage();
+const emit = defineEmits(['close-sidebar']);
 
 const mainNavItems = [
     {
@@ -19,6 +20,11 @@ const mainNavItems = [
         title: 'SCANNER',
         href: '/scanner',
         icon: '📷',
+    },
+    {
+        title: 'INCOME',
+        href: '/income',
+        icon: '💰',
     },
 ];
 
@@ -44,23 +50,26 @@ const handleLogout = () => {
 
         <!-- Navigation Links -->
         <div class="flex-1 py-8 px-4 space-y-2">
-            <Link
-                v-for="item in mainNavItems"
-                :key="item.title"
-                :href="item.href"
-                class="flex items-center gap-3 px-4 py-3 rounded-[4px] font-mono text-xs uppercase tracking-wider hover:bg-stamp/10 hover:text-stamp transition-colors duration-150"
-                :class="[
-                    $page.url.startsWith(item.href) ? 'bg-stamp text-paper hover:bg-stamp hover:text-paper' : 'text-ink'
-                ]"
-            >
-                <span>{{ item.icon }}</span>
-                <span>{{ item.title }}</span>
-            </Link>
+            <template v-for="item in mainNavItems" :key="item.title">
+                <Link
+                    v-if="!(page.props.auth?.user?.role === 'scanner' && (item.title === 'DASHBOARD' || item.title === 'INCOME'))"
+                    :href="item.href"
+                    @click="$emit('close-sidebar')"
+                    class="flex items-center gap-3 px-4 py-3 rounded-[4px] font-mono text-xs uppercase tracking-wider hover:bg-stamp/10 hover:text-stamp transition-colors duration-150"
+                    :class="[
+                        $page.url.startsWith(item.href) ? 'bg-stamp text-paper hover:bg-stamp hover:text-paper' : 'text-ink'
+                    ]"
+                >
+                    <span>{{ item.icon }}</span>
+                    <span>{{ item.title }}</span>
+                </Link>
+            </template>
 
-            <!-- Admin-only User Management link -->
+            <!-- Admin & Staff User Management link -->
             <Link
-                v-if="page.props.auth?.user?.role === 'admin'"
+                v-if="page.props.auth?.user?.role === 'admin' || page.props.auth?.user?.role === 'staff'"
                 href="/users"
+                @click="$emit('close-sidebar')"
                 class="flex items-center gap-3 px-4 py-3 rounded-[4px] font-mono text-xs uppercase tracking-wider hover:bg-stamp/10 hover:text-stamp transition-colors duration-150"
                 :class="[
                     $page.url.startsWith('/users') ? 'bg-stamp text-paper hover:bg-stamp hover:text-paper' : 'text-ink'

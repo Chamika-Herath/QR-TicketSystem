@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\AdminEventController::destroy
-* @see app/Http/Controllers/AdminEventController.php:268
+* @see app/Http/Controllers/AdminEventController.php:320
 * @route '/events/{event}/attendees/{attendee}'
 */
 export const destroy = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -16,7 +16,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroy
-* @see app/Http/Controllers/AdminEventController.php:268
+* @see app/Http/Controllers/AdminEventController.php:320
 * @route '/events/{event}/attendees/{attendee}'
 */
 destroy.url = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions) => {
@@ -46,7 +46,7 @@ destroy.url = (args: { event: number | { id: number }, attendee: number | { id: 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroy
-* @see app/Http/Controllers/AdminEventController.php:268
+* @see app/Http/Controllers/AdminEventController.php:320
 * @route '/events/{event}/attendees/{attendee}'
 */
 destroy.delete = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -56,7 +56,7 @@ destroy.delete = (args: { event: number | { id: number }, attendee: number | { i
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroy
-* @see app/Http/Controllers/AdminEventController.php:268
+* @see app/Http/Controllers/AdminEventController.php:320
 * @route '/events/{event}/attendees/{attendee}'
 */
 const destroyForm = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -71,7 +71,7 @@ const destroyForm = (args: { event: number | { id: number }, attendee: number | 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroy
-* @see app/Http/Controllers/AdminEventController.php:268
+* @see app/Http/Controllers/AdminEventController.php:320
 * @route '/events/{event}/attendees/{attendee}'
 */
 destroyForm.delete = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

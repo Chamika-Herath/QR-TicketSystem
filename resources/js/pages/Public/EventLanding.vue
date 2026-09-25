@@ -12,9 +12,8 @@ const props = defineProps<{
         venue: string;
         starts_at: string;
         ends_at: string;
-        capacity: number;
         ticket_template_path: string;
-        ticket_types?: Array<{ name: string; capacity: number }>;
+        ticket_types?: Array<{ name: string; capacity: number; price?: number }>;
         slug: string;
     };
 }>();
@@ -28,6 +27,7 @@ const form = useForm({
 
 const isSuccess = ref(false);
 const registeredEmail = ref('');
+const registeredPrice = ref(0);
 
 const formattedDate = computed(() => {
   const date = new Date(props.event.starts_at);
@@ -48,6 +48,9 @@ const formattedTime = computed(() => {
 });
 
 const submit = () => {
+    const selectedType = props.event.ticket_types?.find(t => t.name === form.ticket_type);
+    registeredPrice.value = selectedType ? (selectedType.price || 0) : 0;
+    
     form.post(register({ slug: props.event.slug }).url, {
         onSuccess: () => {
             registeredEmail.value = form.email;
@@ -84,6 +87,12 @@ const hasDuplicateError = computed(() => {
                     <p class="font-body text-sm text-muted">
                         Your registration is complete. We've ejected your ticket and sent it to your inbox.
                     </p>
+                    <div class="mt-4 p-4 bg-paper border border-stub-line rounded flex justify-between items-center max-w-sm mx-auto">
+                        <span class="font-mono text-xs uppercase tracking-widest text-muted">TICKET PRICE:</span>
+                        <span class="font-display text-2xl text-ink">
+                            {{ new Intl.NumberFormat('en-US', { style: 'currency', currency: 'LKR' }).format(registeredPrice) }}
+                        </span>
+                    </div>
                 </div>
 
                 <TicketStub :animate="true" class="w-full">
@@ -207,7 +216,7 @@ const hasDuplicateError = computed(() => {
                                 class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp transition"
                             >
                                 <option v-for="type in event.ticket_types" :key="type.name" :value="type.name">
-                                    {{ type.name.toUpperCase() }}
+                                    {{ type.name.toUpperCase() }} &mdash; {{ new Intl.NumberFormat('en-US', { style: 'currency', currency: 'LKR' }).format(type.price || 0) }}
                                 </option>
                             </select>
                             <p v-if="form.errors.ticket_type" class="mt-2 font-mono text-xs text-stamp uppercase">{{ form.errors.ticket_type }}</p>

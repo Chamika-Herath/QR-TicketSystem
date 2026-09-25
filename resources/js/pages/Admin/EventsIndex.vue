@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Head, useForm, router, Link } from '@inertiajs/vue3';
+import { Head, useForm, router, Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 defineProps<{
     events: Array<{
@@ -15,21 +15,26 @@ defineProps<{
         capacity: number;
         status: string;
         attendees_count: number;
+        ticket_types: Array<{name: string, capacity: number, price: number}>;
     }>;
 }>();
 
+const page = usePage();
+const canManageEvents = computed(() => page.props.auth?.user?.role !== 'scanner');
+
 const isCreateOpen = ref(false);
+const editingEvent = ref<any>(null);
 const form = useForm({
     name: '',
     description: '',
     venue: '',
     starts_at: '',
     ends_at: '',
-    ticket_types: [{ name: 'General Admission', capacity: 100 }],
+    ticket_types: [{ name: 'General Admission', capacity: 100, price: 0 }],
 });
 
 const addTicketType = () => {
-    form.ticket_types.push({ name: '', capacity: 50 });
+    form.ticket_types.push({ name: '', capacity: 50, price: 0 });
 };
 
 const removeTicketType = (index: number) => {
@@ -47,10 +52,66 @@ const submit = () => {
     });
 };
 
+const editForm = useForm({
+    name: '',
+    description: '',
+    venue: '',
+    starts_at: '',
+    ends_at: '',
+    ticket_types: [{ name: 'General Admission', capacity: 100, price: 0 }],
+    status: 'draft',
+});
+
+const editEvent = (event: any) => {
+    editingEvent.value = event;
+    editForm.name = event.name;
+    editForm.description = event.description;
+    editForm.venue = event.venue;
+    
+    const formatForInput = (dateStr: string) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        // Correct for timezone to keep local time in input
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        return d.toISOString().slice(0, 16);
+    };
+    
+    editForm.starts_at = formatForInput(event.starts_at);
+    editForm.ends_at = formatForInput(event.ends_at);
+    editForm.ticket_types = JSON.parse(JSON.stringify(event.ticket_types && event.ticket_types.length ? event.ticket_types.map((t: any) => ({...t, price: t.price || 0})) : [{ name: 'General Admission', capacity: 100, price: 0 }]));
+    editForm.status = event.status;
+    
+    isCreateOpen.value = false;
+};
+
+const submitEdit = () => {
+    editForm.put(`/events/${editingEvent.value.id}`, {
+        onSuccess: () => {
+            editingEvent.value = null;
+        }
+    });
+};
+
+const addEditTicketType = () => {
+    editForm.ticket_types.push({ name: '', capacity: 50, price: 0 });
+};
+
+const removeEditTicketType = (index: number) => {
+    if (editForm.ticket_types.length > 1) {
+        editForm.ticket_types.splice(index, 1);
+    }
+};
+
 const deleteEvent = (id: number) => {
     if (confirm('Are you sure you want to delete this event? This will remove all associated attendee registrations and tickets.')) {
         router.delete(`/events/${id}`);
     }
+};
+
+const toggleStatus = (id: number) => {
+    router.patch(`/events/${id}/status`, {}, {
+        preserveScroll: true,
+    });
 };
 
 const formatTime = (timeString: string) => {
@@ -62,6 +123,17 @@ const formatTime = (timeString: string) => {
     hour: '2-digit',
     minute: '2-digit',
   }).toUpperCase();
+};
+
+const getPriceRange = (ticketTypes: Array<{name: string, capacity: number, price?: number}>) => {
+    if (!ticketTypes || ticketTypes.length === 0) return 'FREE';
+    const prices = ticketTypes.map(t => t.price || 0);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    if (min === max) {
+        return min === 0 ? 'FREE' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'LKR' }).format(min);
+    }
+    return `${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'LKR' }).format(min)} - ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'LKR' }).format(max)}`;
 };
 </script>
 
@@ -84,7 +156,8 @@ const formatTime = (timeString: string) => {
                     <p class="font-body text-xs text-muted">Create registries and manage live check-in tickets.</p>
                 </div>
                 <button 
-                    @click="isCreateOpen = !isCreateOpen"
+                    v-if="canManageEvents"
+                    @click="isCreateOpen = !isCreateOpen; editingEvent = null"
                     class="bg-stamp hover:bg-ink text-paper font-mono text-xs uppercase px-5 py-3 rounded-[4px] tracking-wider transition-colors duration-150"
                 >
                     Create Event Counter
@@ -168,6 +241,18 @@ const formatTime = (timeString: string) => {
                                     />
                                     <p v-if="form.errors[`ticket_types.${idx}.capacity`]" class="font-mono text-[10px] text-stamp uppercase mt-1">{{ form.errors[`ticket_types.${idx}.capacity`] }}</p>
                                 </div>
+                                <div class="w-32">
+                                    <label class="block font-mono text-[9px] uppercase tracking-wider text-muted mb-1">Price (LKR)</label>
+                                    <input 
+                                        v-model.number="type.price" 
+                                        type="number" 
+                                        step="0.01"
+                                        required 
+                                        class="w-full bg-paper border border-stub-line rounded-[4px] px-3 py-2 text-xs text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" 
+                                        placeholder="0.00" 
+                                    />
+                                    <p v-if="form.errors[`ticket_types.${idx}.price`]" class="font-mono text-[10px] text-stamp uppercase mt-1">{{ form.errors[`ticket_types.${idx}.price`] }}</p>
+                                </div>
                                 <button 
                                     type="button" 
                                     @click="removeTicketType(idx)"
@@ -183,6 +268,107 @@ const formatTime = (timeString: string) => {
                     <div class="md:col-span-2 flex justify-end gap-4">
                         <button type="button" @click="isCreateOpen = false" class="font-mono text-xs uppercase border border-stub-line hover:border-ink px-5 py-3 rounded-[4px] text-muted hover:text-ink transition">Cancel</button>
                         <button type="submit" :disabled="form.processing" class="bg-stamp hover:bg-ink text-paper font-mono text-xs uppercase px-5 py-3 rounded-[4px] tracking-wider transition disabled:opacity-50">Save Registry</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Edit Modal/Drawer Layout -->
+            <div v-if="editingEvent" class="bg-paper border border-stub-line p-8 rounded-lg space-y-6">
+                <h2 class="font-display text-2xl uppercase tracking-wider text-ink">Edit Event Registry</h2>
+                <form @submit.prevent="submitEdit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">Event Name</label>
+                        <input v-model="editForm.name" type="text" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" />
+                        <p v-if="editForm.errors.name" class="font-mono text-xs text-stamp uppercase mt-1">{{ editForm.errors.name }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">Venue Location</label>
+                        <input v-model="editForm.venue" type="text" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" />
+                        <p v-if="editForm.errors.venue" class="font-mono text-xs text-stamp uppercase mt-1">{{ editForm.errors.venue }}</p>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">Event Description</label>
+                        <textarea v-model="editForm.description" class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">Start Time</label>
+                        <input v-model="editForm.starts_at" type="datetime-local" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" />
+                        <p v-if="editForm.errors.starts_at" class="font-mono text-xs text-stamp uppercase mt-1">{{ editForm.errors.starts_at }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">End Time</label>
+                        <input v-model="editForm.ends_at" type="datetime-local" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" />
+                        <p v-if="editForm.errors.ends_at" class="font-mono text-xs text-stamp uppercase mt-1">{{ editForm.errors.ends_at }}</p>
+                    </div>
+
+                    <!-- Ticket Categories -->
+                    <div class="md:col-span-2 space-y-4 border-t border-dashed border-stub-line pt-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-display text-lg uppercase tracking-wider text-ink">Ticket Categories & Capacities</h3>
+                            </div>
+                            <button 
+                                type="button" 
+                                @click="addEditTicketType"
+                                class="border border-stamp hover:bg-stamp hover:text-paper text-stamp font-mono text-[10px] uppercase px-3 py-1.5 rounded-[4px] tracking-wider transition-colors"
+                            >
+                                + Add Category
+                            </button>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div 
+                                v-for="(type, idx) in editForm.ticket_types" 
+                                :key="idx" 
+                                class="flex items-start gap-4 bg-paper/60 p-4 border border-stub-line/60 rounded-[4px]"
+                            >
+                                <div class="flex-1">
+                                    <label class="block font-mono text-[9px] uppercase tracking-wider text-muted mb-1">Category Name</label>
+                                    <input 
+                                        v-model="type.name" 
+                                        type="text" 
+                                        required 
+                                        class="w-full bg-paper border border-stub-line rounded-[4px] px-3 py-2 text-xs text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" 
+                                    />
+                                </div>
+                                <div class="w-32">
+                                    <label class="block font-mono text-[9px] uppercase tracking-wider text-muted mb-1">Seat Capacity</label>
+                                    <input 
+                                        v-model.number="type.capacity" 
+                                        type="number" 
+                                        required 
+                                        class="w-full bg-paper border border-stub-line rounded-[4px] px-3 py-2 text-xs text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" 
+                                    />
+                                </div>
+                                <div class="w-32">
+                                    <label class="block font-mono text-[9px] uppercase tracking-wider text-muted mb-1">Price (LKR)</label>
+                                    <input 
+                                        v-model.number="type.price" 
+                                        type="number"
+                                        step="0.01" 
+                                        required 
+                                        class="w-full bg-paper border border-stub-line rounded-[4px] px-3 py-2 text-xs text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" 
+                                    />
+                                </div>
+                                <button 
+                                    type="button" 
+                                    @click="removeEditTicketType(idx)"
+                                    :disabled="editForm.ticket_types.length <= 1"
+                                    class="mt-6.5 p-2 rounded-[4px] border border-stamp/20 hover:bg-stamp/10 text-stamp transition disabled:opacity-30"
+                                >
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2 flex justify-end gap-4">
+                        <button type="button" @click="editingEvent = null" class="font-mono text-xs uppercase border border-stub-line hover:border-ink px-5 py-3 rounded-[4px] text-muted hover:text-ink transition">Cancel</button>
+                        <button type="submit" :disabled="editForm.processing" class="bg-stamp hover:bg-ink text-paper font-mono text-xs uppercase px-5 py-3 rounded-[4px] tracking-wider transition disabled:opacity-50">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -215,18 +401,28 @@ const formatTime = (timeString: string) => {
                         <div class="mt-4 space-y-2 border-t border-dashed border-stub-line pt-4 font-mono text-[10px] text-ink/80">
                             <div>📍 VENUE: <span class="font-medium text-ink">{{ event.venue }}</span></div>
                             <div>📅 STARTS: <span class="font-medium text-ink">{{ formatTime(event.starts_at) }}</span></div>
+                            <div>🎟️ PRICE: <span class="font-medium text-ink">{{ getPriceRange(event.ticket_types) }}</span></div>
                             <div>👥 STUBS: <span class="font-medium text-stamp font-bold">{{ event.attendees_count }} REGISTERED</span></div>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-3 mt-6 pt-4 border-t border-dashed border-stub-line">
+                    <div class="flex items-center gap-2 mt-6 pt-4 border-t border-dashed border-stub-line">
                         <Link :href="`/events/${event.id}/attendees`" class="flex-1 text-center py-2 rounded-[4px] font-mono text-[10px] uppercase border border-stub-line hover:border-ink hover:text-ink text-muted transition">
                             Registry
                         </Link>
-                        <a :href="`/events/${event.slug}`" target="_blank" class="flex-1 text-center py-2 rounded-[4px] font-mono text-[10px] uppercase bg-stamp hover:bg-ink text-paper transition">
+                        <button v-if="canManageEvents" @click="editEvent(event)" class="flex-1 text-center py-2 rounded-[4px] font-mono text-[10px] uppercase border border-stub-line hover:border-ink hover:text-ink text-muted transition">
+                            Edit
+                        </button>
+                        <button v-if="canManageEvents" @click="toggleStatus(event.id)" :class="[
+                            'flex-1 text-center py-2 rounded-[4px] font-mono text-[10px] uppercase border transition',
+                            event.status === 'published' ? 'border-stub-line hover:border-ink hover:text-ink text-muted' : 'border-confirmed/50 text-confirmed hover:bg-confirmed/10'
+                        ]">
+                            {{ event.status === 'published' ? 'Unpublish' : 'Publish' }}
+                        </button>
+                        <a v-if="event.status === 'published'" :href="`/events/${event.slug}`" target="_blank" class="flex-1 text-center py-2 rounded-[4px] font-mono text-[10px] uppercase bg-stamp hover:bg-ink text-paper transition">
                             Form
                         </a>
-                        <button @click="deleteEvent(event.id)" class="p-2 rounded-[4px] border border-stamp/20 hover:bg-stamp/10 text-stamp transition">
+                        <button v-if="canManageEvents" @click="deleteEvent(event.id)" class="px-3 py-2 rounded-[4px] border border-stamp/20 hover:bg-stamp/10 text-stamp transition">
                             🗑️
                         </button>
                     </div>

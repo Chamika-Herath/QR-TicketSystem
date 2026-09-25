@@ -23,6 +23,8 @@ class AdminEventController extends Controller
     {
         if (auth()->user()->role === 'admin') {
             $events = Event::withCount('attendees')->latest()->get();
+        } elseif (auth()->user()->role === 'scanner') {
+            $events = Event::where('created_by', auth()->user()->created_by)->withCount('attendees')->latest()->get();
         } else {
             $events = Event::where('created_by', auth()->id())->withCount('attendees')->latest()->get();
         }
@@ -37,6 +39,10 @@ class AdminEventController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if (auth()->user()->role === 'scanner') {
+            abort(403, 'Scanners cannot create events.');
+        }
+
         if (auth()->user()->role !== 'admin') {
             $existingCount = Event::where('created_by', auth()->id())->count();
             if ($existingCount >= auth()->user()->allowed_event_limit) {
@@ -54,10 +60,18 @@ class AdminEventController extends Controller
             'ticket_types' => 'required|array|min:1',
             'ticket_types.*.name' => 'required|string|max:255',
             'ticket_types.*.capacity' => 'required|integer|min:1',
+            'ticket_types.*.price' => 'required|numeric|min:0',
         ]);
 
         $ticketTypes = $validated['ticket_types'];
         $overallCapacity = collect($ticketTypes)->sum('capacity');
+
+        if (auth()->user()->role !== 'admin') {
+            $totalCapacityUsed = Event::where('created_by', auth()->id())->sum('capacity');
+            if (($totalCapacityUsed + $overallCapacity) > auth()->user()->allowed_ticket_limit) {
+                return back()->withErrors(['name' => 'This event capacity exceeds your total allowed ticket issuance limit (' . auth()->user()->allowed_ticket_limit . ' tickets).']);
+            }
+        }
 
         $slug = Str::slug($validated['name']);
         // Append random string if slug exists
@@ -107,11 +121,21 @@ class AdminEventController extends Controller
             'ticket_types' => 'required|array|min:1',
             'ticket_types.*.name' => 'required|string|max:255',
             'ticket_types.*.capacity' => 'required|integer|min:1',
+            'ticket_types.*.price' => 'required|numeric|min:0',
             'status' => 'required|in:draft,published,closed',
         ]);
 
         $ticketTypes = $validated['ticket_types'];
         $overallCapacity = collect($ticketTypes)->sum('capacity');
+
+        if (auth()->user()->role !== 'admin') {
+            $totalCapacityUsed = Event::where('created_by', auth()->id())
+                ->where('id', '!=', $event->id)
+                ->sum('capacity');
+            if (($totalCapacityUsed + $overallCapacity) > auth()->user()->allowed_ticket_limit) {
+                return back()->withErrors(['name' => 'This event capacity exceeds your total allowed ticket issuance limit (' . auth()->user()->allowed_ticket_limit . ' tickets).']);
+            }
+        }
 
         $templatePath = $event->ticket_template_path;
         if ($request->hasFile('ticket_template')) {
@@ -139,6 +163,22 @@ class AdminEventController extends Controller
     }
 
     /**
+     * Toggle the status of the event.
+     */
+    public function toggleStatus(Event $event): RedirectResponse
+    {
+        if (auth()->user()->role !== 'admin' && $event->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $event->update([
+            'status' => $event->status === 'published' ? 'draft' : 'published',
+        ]);
+
+        return back()->with('success', 'Event status updated successfully.');
+    }
+
+    /**
      * Delete an event.
      */
     public function destroy(Event $event): RedirectResponse
@@ -159,7 +199,11 @@ class AdminEventController extends Controller
      */
     public function attendees(Request $request, Event $event): Response
     {
-        if (auth()->user()->role !== 'admin' && $event->created_by !== auth()->id()) {
+        $isAuthorized = auth()->user()->role === 'admin' 
+            || $event->created_by === auth()->id() 
+            || (auth()->user()->role === 'scanner' && $event->created_by === auth()->user()->created_by);
+
+        if (!$isAuthorized) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -189,7 +233,11 @@ class AdminEventController extends Controller
      */
     public function manualCheckin(Request $request, Event $event, Attendee $attendee): RedirectResponse
     {
-        if (auth()->user()->role !== 'admin' && $event->created_by !== auth()->id()) {
+        $isAuthorized = auth()->user()->role === 'admin' 
+            || $event->created_by === auth()->id() 
+            || (auth()->user()->role === 'scanner' && $event->created_by === auth()->user()->created_by);
+
+        if (!$isAuthorized) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -217,7 +265,11 @@ class AdminEventController extends Controller
      */
     public function exportCsv(Event $event)
     {
-        if (auth()->user()->role !== 'admin' && $event->created_by !== auth()->id()) {
+        $isAuthorized = auth()->user()->role === 'admin' 
+            || $event->created_by === auth()->id() 
+            || (auth()->user()->role === 'scanner' && $event->created_by === auth()->user()->created_by);
+
+        if (!$isAuthorized) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -267,7 +319,11 @@ class AdminEventController extends Controller
      */
     public function destroyAttendee(Event $event, Attendee $attendee): RedirectResponse
     {
-        if (auth()->user()->role !== 'admin' && $event->created_by !== auth()->id()) {
+        $isAuthorized = auth()->user()->role === 'admin' 
+            || $event->created_by === auth()->id() 
+            || (auth()->user()->role === 'scanner' && $event->created_by === auth()->user()->created_by);
+
+        if (!$isAuthorized) {
             abort(403, 'Unauthorized action.');
         }
 

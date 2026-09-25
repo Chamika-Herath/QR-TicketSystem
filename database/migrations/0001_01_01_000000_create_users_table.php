@@ -17,7 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('role')->default('staff'); // admin | staff
+            $table->string('role')->default('staff'); // admin | staff | scanner
+            $table->integer('allowed_event_limit')->default(5);
+            $table->integer('allowed_ticket_limit')->default(100);
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->rememberToken();
             $table->timestamps();
         });

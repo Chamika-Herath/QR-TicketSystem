@@ -33,7 +33,16 @@ class CheckInController extends Controller
             ], 404);
         }
 
-        if (auth()->user()->role !== 'admin' && $ticket->attendee->event->created_by !== auth()->id()) {
+        $isAuthorized = false;
+        if (auth()->user()->role === 'admin') {
+            $isAuthorized = true;
+        } elseif (auth()->user()->role === 'staff' && $ticket->attendee->event->created_by === auth()->id()) {
+            $isAuthorized = true;
+        } elseif (auth()->user()->role === 'scanner' && $ticket->attendee->event->created_by === auth()->user()->created_by) {
+            $isAuthorized = true;
+        }
+
+        if (!$isAuthorized) {
             return response()->json([
                 'status' => 'invalid',
                 'message' => 'This ticket is not for an event you manage.'

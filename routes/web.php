@@ -5,6 +5,7 @@ use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\AdminEventController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\IncomeController;
 
 // Public event routes
 Route::get('/events/{slug}', [PublicEventController::class, 'show'])->name('events.show');
@@ -32,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/events', [AdminEventController::class, 'index'])->name('admin.events');
     Route::post('/events', [AdminEventController::class, 'store'])->name('admin.events.store');
     Route::put('/events/{event}', [AdminEventController::class, 'update'])->name('admin.events.update');
+    Route::patch('/events/{event}/status', [AdminEventController::class, 'toggleStatus'])->name('admin.events.toggle-status');
     Route::delete('/events/{event}', [AdminEventController::class, 'destroy'])->name('admin.events.destroy');
 
     // Admin only User Management CRUD
@@ -39,6 +41,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/users', [\App\Http\Controllers\UserController::class, 'store'])->name('admin.users.store');
     Route::put('/users/{user}', [\App\Http\Controllers\UserController::class, 'update'])->name('admin.users.update');
     Route::delete('/users/{user}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('admin.users.destroy');
+
+    // Income & Reports
+    Route::get('/income', [IncomeController::class, 'index'])->name('admin.income');
 });
 
 // Front page route

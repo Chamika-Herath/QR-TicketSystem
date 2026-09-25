@@ -20,6 +20,7 @@ return new class extends Migration
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');
             $table->integer('capacity');
+            $table->json('ticket_types')->nullable();
             $table->string('ticket_template_path')->nullable();
             $table->string('status')->default('draft'); // draft | published | closed
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
@@ -44,6 +45,9 @@ return new class extends Migration
             $table->string('token')->unique();
             $table->string('qr_image_path')->nullable();
             $table->string('ticket_image_path')->nullable();
+            $table->string('ticket_type')->nullable();
+            $table->decimal('price', 10, 2)->default(0);
+            $table->string('seat_number')->nullable();
             $table->string('status')->default('issued'); // issued | revoked
             $table->timestamps();
         });
