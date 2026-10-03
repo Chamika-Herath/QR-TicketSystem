@@ -27,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/events/{event}/attendees', [AdminEventController::class, 'attendees'])->name('admin.events.attendees');
     Route::delete('/events/{event}/attendees/{attendee}', [AdminEventController::class, 'destroyAttendee'])->name('admin.events.attendees.destroy');
     Route::post('/events/{event}/attendees/{attendee}/manual-checkin', [AdminEventController::class, 'manualCheckin'])->name('admin.events.manual-checkin');
+    Route::post('/events/{event}/attendees/{attendee}/resend', [AdminEventController::class, 'resendTicket'])->name('admin.events.resend');
     Route::get('/events/{event}/export', [AdminEventController::class, 'exportCsv'])->name('admin.events.export');
 
     // Admin only CRUD (add middleware check if required, or simply restrict via role checking in controller/Inertia)

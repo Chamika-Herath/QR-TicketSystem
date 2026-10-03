@@ -54,20 +54,22 @@ class PublicEventController extends Controller
             'email' => 'required|email|max:255|unique:attendees,email,NULL,id,event_id,' . $event->id,
             'phone' => 'required|string|max:20',
             'ticket_type' => ['required', 'string', \Illuminate\Validation\Rule::in($allowedNames)],
+            'quantity' => 'required|integer|min:1|max:10',
         ], [
             'email.unique' => 'You are already registered for this event with this email address.',
         ]);
 
         $chosenType = $validated['ticket_type'];
+        $requestedQuantity = $validated['quantity'];
         $registeredCount = Ticket::whereHas('attendee', function ($query) use ($event) {
             $query->where('event_id', $event->id);
-        })->where('ticket_type', $chosenType)->count();
+        })->where('ticket_type', $chosenType)->sum('quantity');
 
         $categoryConfig = collect($allowedTypes)->firstWhere('name', $chosenType);
         $categoryLimit = $categoryConfig ? ($categoryConfig['capacity'] ?? 100) : 100;
 
-        if ($registeredCount >= $categoryLimit) {
-            return back()->withErrors(['ticket_type' => "Sorry, the {$chosenType} ticket category is fully booked!"]);
+        if (($registeredCount + $requestedQuantity) > $categoryLimit) {
+            return back()->withErrors(['quantity' => "Sorry, only " . ($categoryLimit - $registeredCount) . " {$chosenType} tickets are left!"]);
         }
 
         $seatNumber = strtoupper($chosenType) . '-' . ($registeredCount + 1);
@@ -83,11 +85,14 @@ class PublicEventController extends Controller
             $token = \Illuminate\Support\Str::random(32);
         } while (Ticket::where('token', $token)->exists());
 
+        $unitPrice = $categoryConfig ? ($categoryConfig['price'] ?? 0) : 0;
+
         $ticket = Ticket::create([
             'attendee_id' => $attendee->id,
             'token' => $token,
             'ticket_type' => $chosenType,
-            'price' => $categoryConfig ? ($categoryConfig['price'] ?? 0) : 0,
+            'price' => $unitPrice * $requestedQuantity,
+            'quantity' => $requestedQuantity,
             'seat_number' => $seatNumber,
             'status' => 'issued',
         ]);

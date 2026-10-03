@@ -89,11 +89,13 @@
                   </tr>
                   <tr style="height: 26px;">
                     <td style="color: #64748B;">Quantity</td>
-                    <td align="right" style="font-weight: bold; color: #1B2430;">1</td>
+                    <td align="right" style="font-weight: bold; color: #1B2430;">{{ $quantity ?? 1 }}</td>
                   </tr>
                   <tr style="height: 26px;">
                     <td style="color: #64748B;">Price</td>
-                    <td align="right" style="font-weight: bold; color: #4C33A3;">FREE</td>
+                    <td align="right" style="font-weight: bold; color: #4C33A3;">
+                      {{ $price > 0 ? 'LKR ' . number_format($price, 2) : 'FREE' }}
+                    </td>
                   </tr>
                   @if(!empty($seatNumber))
                   <tr style="height: 26px;">

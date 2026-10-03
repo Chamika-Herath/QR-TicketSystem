@@ -56,13 +56,16 @@ class CheckInController extends Controller
             ], 400);
         }
 
-        // Check if already checked in
-        $existingCheckIn = CheckIn::where('ticket_id', $ticket->id)->first();
-        if ($existingCheckIn) {
+        // Check existing check-ins
+        $totalCheckedIn = CheckIn::where('ticket_id', $ticket->id)->sum('entries');
+        $availableQuantity = $ticket->quantity - $totalCheckedIn;
+
+        if ($availableQuantity <= 0) {
+            $lastCheckIn = CheckIn::where('ticket_id', $ticket->id)->latest()->first();
             return response()->json([
                 'status' => 'already_checked_in',
-                'message' => 'Already checked in.',
-                'scanned_at' => $existingCheckIn->scanned_at->format('M d, Y h:i A'),
+                'message' => 'All tickets under this token have already been checked in.',
+                'scanned_at' => $lastCheckIn ? $lastCheckIn->scanned_at->format('M d, Y h:i A') : '',
                 'attendee' => [
                     'name' => $ticket->attendee->name,
                     'email' => $ticket->attendee->email,
@@ -71,12 +74,37 @@ class CheckInController extends Controller
             ], 409);
         }
 
+        $entries = $request->input('entries', null);
+
+        if ($availableQuantity > 1 && $entries === null) {
+            return response()->json([
+                'status' => 'requires_quantity',
+                'message' => 'Multiple tickets available. Select quantity to check in.',
+                'available_quantity' => $availableQuantity,
+                'attendee' => [
+                    'name' => $ticket->attendee->name,
+                    'email' => $ticket->attendee->email,
+                    'event_name' => $ticket->attendee->event->name,
+                ]
+            ], 200);
+        }
+
+        $entries = (int) ($entries ?? 1);
+
+        if ($entries > $availableQuantity) {
+            return response()->json([
+                'status' => 'invalid',
+                'message' => "Cannot check in $entries people. Only $availableQuantity left."
+            ], 400);
+        }
+
         // Perform Check-in
         $checkIn = CheckIn::create([
             'ticket_id' => $ticket->id,
             'scanned_by' => auth()->id(),
             'scanned_at' => now(),
             'device_info' => $request->header('User-Agent'),
+            'entries' => $entries,
         ]);
 
         return response()->json([
@@ -86,6 +114,9 @@ class CheckInController extends Controller
                 'name' => $ticket->attendee->name,
                 'email' => $ticket->attendee->email,
                 'event_name' => $ticket->attendee->event->name,
+                'total_quantity' => $ticket->quantity,
+                'checked_in_now' => $entries,
+                'remaining_quantity' => $availableQuantity - $entries,
             ]
         ], 200);
     }

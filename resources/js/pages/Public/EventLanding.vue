@@ -23,6 +23,7 @@ const form = useForm({
     email: '',
     phone: '',
     ticket_type: props.event.ticket_types?.[0]?.name || 'General Admission',
+    quantity: 1,
 });
 
 const isSuccess = ref(false);
@@ -49,7 +50,7 @@ const formattedTime = computed(() => {
 
 const submit = () => {
     const selectedType = props.event.ticket_types?.find(t => t.name === form.ticket_type);
-    registeredPrice.value = selectedType ? (selectedType.price || 0) : 0;
+    registeredPrice.value = selectedType ? (selectedType.price || 0) * form.quantity : 0;
     
     form.post(register({ slug: props.event.slug }).url, {
         onSuccess: () => {
@@ -220,6 +221,20 @@ const hasDuplicateError = computed(() => {
                                 </option>
                             </select>
                             <p v-if="form.errors.ticket_type" class="mt-2 font-mono text-xs text-stamp uppercase">{{ form.errors.ticket_type }}</p>
+                        </div>
+
+                        <!-- Quantity Selector -->
+                        <div>
+                            <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">QUANTITY (MAX 10)</label>
+                            <input 
+                                v-model="form.quantity" 
+                                type="number" 
+                                required
+                                min="1"
+                                max="10"
+                                class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp transition"
+                            />
+                            <p v-if="form.errors.quantity" class="mt-2 font-mono text-xs text-stamp uppercase">{{ form.errors.quantity }}</p>
                         </div>
 
                         <!-- Duplicate Registration Helper -->

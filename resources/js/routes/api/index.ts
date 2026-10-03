@@ -74,7 +74,7 @@ checkinForm.post = (args: { token: string | number } | [token: string | number ]
 checkin.form = checkinForm
 
 /**
-* @see routes/web.php:63
+* @see routes/web.php:64
 * @route '/api/events'
 */
 export const events = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -88,7 +88,7 @@ events.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
-* @see routes/web.php:63
+* @see routes/web.php:64
 * @route '/api/events'
 */
 events.url = (options?: RouteQueryOptions) => {
@@ -96,7 +96,7 @@ events.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see routes/web.php:63
+* @see routes/web.php:64
 * @route '/api/events'
 */
 events.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -105,7 +105,7 @@ events.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 
 /**
-* @see routes/web.php:63
+* @see routes/web.php:64
 * @route '/api/events'
 */
 events.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -114,7 +114,7 @@ events.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
 /**
-* @see routes/web.php:63
+* @see routes/web.php:64
 * @route '/api/events'
 */
 const eventsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -123,7 +123,7 @@ const eventsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 })
 
 /**
-* @see routes/web.php:63
+* @see routes/web.php:64
 * @route '/api/events'
 */
 eventsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -132,7 +132,7 @@ eventsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 })
 
 /**
-* @see routes/web.php:63
+* @see routes/web.php:64
 * @route '/api/events'
 */
 eventsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

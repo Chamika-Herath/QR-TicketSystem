@@ -18,6 +18,7 @@ class Ticket extends Model
         'ticket_image_path',
         'ticket_type',
         'price',
+        'quantity',
         'seat_number',
         'status',
     ];

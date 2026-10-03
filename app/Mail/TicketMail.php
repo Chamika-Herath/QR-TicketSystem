@@ -54,6 +54,8 @@ class TicketMail extends Mailable implements ShouldQueue
                 'token' => $this->ticket->token,
                 'ticketType' => $this->ticket->ticket_type,
                 'seatNumber' => $this->ticket->seat_number,
+                'price' => $this->ticket->price,
+                'quantity' => $this->ticket->quantity ?? 1,
                 'isResend' => $this->isResend,
             ]
         );

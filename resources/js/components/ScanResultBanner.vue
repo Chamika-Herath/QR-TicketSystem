@@ -2,10 +2,13 @@
 import { computed } from 'vue';
 
 const props = defineProps<{
-  status: 'valid' | 'already_checked_in' | 'invalid' | null;
+  status: 'valid' | 'already_checked_in' | 'invalid' | 'requires_quantity' | null;
   attendeeName?: string;
   checkInTime?: string;
   message?: string;
+  totalQuantity?: number;
+  checkedInNow?: number;
+  remainingQuantity?: number;
 }>();
 
 const classes = computed(() => {
@@ -34,13 +37,18 @@ const classes = computed(() => {
       class="border p-6 rounded-lg text-center shadow-none flex flex-col items-center justify-center min-h-[140px] z-30"
       :class="classes"
     >
-      <div v-if="status === 'valid'" class="flex flex-col items-center">
+      <div v-if="status === 'valid'" class="flex flex-col items-center w-full">
         <!-- SVG Checkmark -->
         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
         </svg>
         <h4 class="font-display text-2xl uppercase tracking-wider">TICKET VALID</h4>
         <p class="font-body text-base font-semibold mt-1">{{ attendeeName }}</p>
+        
+        <div v-if="totalQuantity && totalQuantity > 1" class="mt-3 bg-black/20 w-full py-2 px-4 rounded-md flex justify-between items-center text-xs font-mono">
+            <span>Checked in: {{ checkedInNow }}</span>
+            <span class="font-bold">Left: {{ remainingQuantity }} / {{ totalQuantity }}</span>
+        </div>
       </div>
 
       <div v-else-if="status === 'already_checked_in'" class="flex flex-col items-center">

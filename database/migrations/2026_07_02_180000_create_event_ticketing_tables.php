@@ -47,6 +47,7 @@ return new class extends Migration
             $table->string('ticket_image_path')->nullable();
             $table->string('ticket_type')->nullable();
             $table->decimal('price', 10, 2)->default(0);
+            $table->integer('quantity')->default(1);
             $table->string('seat_number')->nullable();
             $table->string('status')->default('issued'); // issued | revoked
             $table->timestamps();
@@ -54,8 +55,9 @@ return new class extends Migration
 
         Schema::create('check_ins', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ticket_id')->unique()->constrained('tickets')->onDelete('cascade');
+            $table->foreignId('ticket_id')->constrained('tickets')->onDelete('cascade');
             $table->foreignId('scanned_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->integer('entries')->default(1);
             $table->timestamp('scanned_at')->useCurrent();
             $table->string('device_info')->nullable();
             $table->timestamps();

@@ -21,42 +21,68 @@ const isSubmittingManual = ref(false);
 const manualError = ref('');
 
 const scanResult = ref<{
-    status: 'valid' | 'already_checked_in' | 'invalid' | null;
+    status: 'valid' | 'already_checked_in' | 'invalid' | 'requires_quantity' | null;
     attendeeName?: string;
     checkInTime?: string;
     message?: string;
+    availableQuantity?: number;
+    pendingToken?: string;
+    totalQuantity?: number;
+    checkedInNow?: number;
+    remainingQuantity?: number;
 }>({
     status: null,
 });
+
+const selectedQuantity = ref(1);
 
 let html5QrcodeScanner: Html5QrcodeScanner | null = null;
 const isScanning = ref(true);
 const showManualInput = ref(false);
 
-const processCheckIn = async (token: string) => {
+const processCheckIn = async (token: string, entries?: number) => {
     try {
+        const payload = entries ? JSON.stringify({ entries }) : undefined;
+        
         const res = await fetch(`/api/checkin/${token}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
-            }
+            },
+            body: payload
         });
 
         const data = await res.json();
         
         if (res.ok) {
+            if (data.status === 'requires_quantity') {
+                scanResult.value = {
+                    status: 'requires_quantity',
+                    attendeeName: data.attendee?.name || 'Attendee',
+                    message: data.message,
+                    availableQuantity: data.available_quantity,
+                    pendingToken: token,
+                };
+                selectedQuantity.value = 1;
+                return; // Do not auto-reset, wait for user input
+            }
+            
             scanResult.value = {
                 status: 'valid',
                 attendeeName: data.attendee?.name || 'Attendee',
+                totalQuantity: data.attendee?.total_quantity,
+                checkedInNow: data.attendee?.checked_in_now,
+                remainingQuantity: data.attendee?.remaining_quantity,
             };
-            localCount.value++;
+            localCount.value += (entries || 1);
             manualToken.value = '';
         } else if (res.status === 409) {
             scanResult.value = {
                 status: 'already_checked_in',
                 attendeeName: data.attendee?.name || 'Attendee',
                 checkInTime: data.scanned_at || 'Just now',
+                message: data.message,
             };
         } else {
             scanResult.value = {
@@ -73,9 +99,16 @@ const processCheckIn = async (token: string) => {
 
     // Auto reset result after 2.5 seconds and resume scanning
     setTimeout(() => {
-        scanResult.value = { status: null };
-        isScanning.value = true;
+        if (scanResult.value.status !== 'requires_quantity') {
+            scanResult.value = { status: null };
+            isScanning.value = true;
+        }
     }, 2500);
+};
+
+const confirmQuantityCheckIn = async () => {
+    if (!scanResult.value.pendingToken) return;
+    await processCheckIn(scanResult.value.pendingToken, selectedQuantity.value);
 };
 
 const onScanSuccess = async (decodedText: string) => {
@@ -135,16 +168,48 @@ onUnmounted(() => {
             </div>
 
             <!-- Scan Outcome Overlay (over top portion) -->
-            <div class="relative min-h-[140px] flex items-center justify-center">
+            <div class="relative min-h-[140px] flex flex-col items-center justify-center space-y-4">
                 <div v-if="!scanResult.status" class="text-center font-mono text-xs text-muted/60 animate-pulse border border-dashed border-stub-line w-full py-8 rounded-lg">
                     [ WAITING FOR CODE FRAME ]
                 </div>
+                
+                <div v-else-if="scanResult.status === 'requires_quantity'" class="w-full bg-paper border border-stub-line rounded-lg p-6 space-y-4 shadow-sm">
+                    <div class="text-center">
+                        <h2 class="font-display text-2xl uppercase tracking-wider text-ink mb-1">MULTIPLE TICKETS</h2>
+                        <p class="font-mono text-[10px] uppercase text-muted tracking-widest">{{ scanResult.attendeeName }} has {{ scanResult.availableQuantity }} tickets available</p>
+                    </div>
+                    
+                    <div class="flex flex-col items-center space-y-4">
+                        <label class="font-mono text-[10px] uppercase tracking-wider text-ink">How many are checking in now?</label>
+                        <div class="flex items-center space-x-4">
+                            <button 
+                                @click="selectedQuantity > 1 && selectedQuantity--"
+                                class="w-10 h-10 border border-stub-line rounded bg-background text-ink font-mono hover:bg-stub-line transition"
+                            >-</button>
+                            <span class="font-display text-2xl w-8 text-center">{{ selectedQuantity }}</span>
+                            <button 
+                                @click="selectedQuantity < (scanResult.availableQuantity || 1) && selectedQuantity++"
+                                class="w-10 h-10 border border-stub-line rounded bg-background text-ink font-mono hover:bg-stub-line transition"
+                            >+</button>
+                        </div>
+                        <button 
+                            @click="confirmQuantityCheckIn"
+                            class="w-full bg-stamp hover:bg-ink text-paper font-mono text-xs uppercase px-4 py-3 rounded-[4px] tracking-wider transition"
+                        >
+                            CONFIRM CHECK-IN ({{ selectedQuantity }})
+                        </button>
+                    </div>
+                </div>
+
                 <ScanResultBanner
                     v-else
                     :status="scanResult.status"
                     :attendeeName="scanResult.attendeeName"
                     :checkInTime="scanResult.checkInTime"
                     :message="scanResult.message"
+                    :totalQuantity="scanResult.totalQuantity"
+                    :checkedInNow="scanResult.checkedInNow"
+                    :remainingQuantity="scanResult.remainingQuantity"
                     class="w-full"
                 />
             </div>

@@ -23,6 +23,8 @@ const stats = ref({
     total_checked_in: 0,
     capacity: 0,
     hourly_data: [] as Array<{ hour: string; count: number }>,
+    tickets_by_type: [] as Array<{ ticket_type: string; count: number; income: number }>,
+    total_income: 0,
 });
 
 const loadStats = async () => {
@@ -39,6 +41,12 @@ const loadStats = async () => {
 
 const changeEvent = (id: number) => {
     router.get('/dashboard', { event_id: id }, { preserveState: true });
+};
+
+const exportIncome = () => {
+    if (props.selectedEventId) {
+        window.location.href = `/events/${props.selectedEventId}/export`;
+    }
 };
 
 // Set up 5s polling for live updates
@@ -135,6 +143,38 @@ const formatHourLabel = (hourString: string) => {
                     :value="`${stats.total_registered > 0 ? Math.round((stats.total_checked_in / stats.total_registered) * 100) : 0}%`" 
                     description="Proportion of registered arrivals"
                 />
+            </div>
+
+            <!-- New Section for Ticket Types & Income -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8" v-if="event">
+                <div class="bg-paper border border-stub-line p-8 rounded-lg space-y-4">
+                    <div class="flex justify-between items-center border-b border-dashed border-stub-line pb-4">
+                        <h3 class="font-display text-2xl uppercase tracking-wide">Ticket Categories</h3>
+                        <span class="font-mono text-[10px] text-muted">SOLD / INCOME</span>
+                    </div>
+                    <div v-if="stats.tickets_by_type && stats.tickets_by_type.length > 0" class="space-y-3">
+                        <div v-for="t in stats.tickets_by_type" :key="t.ticket_type" class="flex justify-between items-center text-sm">
+                            <span class="font-mono uppercase font-bold text-ink">{{ t.ticket_type }}</span>
+                            <span class="font-mono text-muted">{{ t.count }} tickets / LKR {{ Number(t.income).toLocaleString(undefined, {minimumFractionDigits: 2}) }}</span>
+                        </div>
+                    </div>
+                    <div v-else class="text-center text-muted font-mono text-xs py-4">NO TICKETS SOLD</div>
+                </div>
+
+                <div class="bg-paper border border-stub-line p-8 rounded-lg flex flex-col justify-between space-y-4">
+                    <div>
+                        <h3 class="font-display text-2xl uppercase tracking-wide text-ink mb-1">Total Income</h3>
+                        <p class="font-body text-xs text-muted">Accumulated revenue from ticket sales for this event.</p>
+                    </div>
+                    <div class="font-display text-5xl text-stamp">
+                        <span class="text-2xl text-ink">LKR</span> {{ Number(stats.total_income || 0).toLocaleString(undefined, {minimumFractionDigits: 2}) }}
+                    </div>
+                    <div class="pt-4 border-t border-dashed border-stub-line flex justify-end">
+                        <button @click="exportIncome" class="font-mono text-[10px] uppercase border border-stub-line hover:border-ink hover:text-ink text-muted px-4 py-2 rounded-[4px] transition flex items-center gap-2">
+                            <span>📄</span> EXPORT INCOME REPORT
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Chart Section -->

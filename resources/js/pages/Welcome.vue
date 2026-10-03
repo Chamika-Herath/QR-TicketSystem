@@ -67,17 +67,11 @@ defineProps<{
             A vintage-inspired event registration and check-in desk. Attendees get clean, ink-confirmable ticket stubs. Staff check in guests with a single, one-handed mobile scanner.
           </p>
           <div class="flex flex-wrap gap-4 pt-2">
-            <a
-              href="#upcoming-events"
+            <Link
+              href="/login"
               class="bg-stamp hover:bg-ink text-paper font-mono text-sm uppercase px-6 py-3.5 rounded-[4px] tracking-wider transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-stamp focus:ring-offset-2"
             >
-              Browse Events
-            </a>
-            <Link
-              href="/tickets/resend"
-              class="border border-stub-line hover:border-ink font-mono text-sm uppercase px-6 py-3.5 rounded-[4px] tracking-wider transition-colors duration-150 focus:outline-none"
-            >
-              Resend Ticket
+              Sign In
             </Link>
           </div>
         </div>
@@ -195,27 +189,7 @@ defineProps<{
         </div>
       </section>
 
-      <!-- 3. Upcoming Events Grid -->
-      <section id="upcoming-events" class="border-t border-stub-line pt-20">
-        <div class="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 gap-4">
-          <div class="space-y-2">
-            <span class="font-mono text-xs uppercase text-muted tracking-wider">REGISTRATION OPEN</span>
-            <h2 class="font-display text-4xl uppercase tracking-wider">LIVE & UPCOMING EVENTS</h2>
-          </div>
-          <span class="font-mono text-xs text-muted uppercase">
-            {{ events.length }} {{ events.length === 1 ? 'event' : 'events' }} available
-          </span>
-        </div>
 
-        <div v-if="events.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <EventCard v-for="event in events" :key="event.id" :event="event" />
-        </div>
-
-        <EmptyState
-          v-else
-          message="No events open for registration yet — check back soon or register your interest with the coordinators."
-        />
-      </section>
 
       <!-- 4. For Organizers -->
       <section class="border-t border-stub-line pt-20 text-center max-w-2xl mx-auto space-y-6">
@@ -242,8 +216,6 @@ defineProps<{
         </div>
         <div class="flex gap-6">
           <Link href="/login" class="hover:text-ink transition-colors duration-150">Admin Sign In</Link>
-          <span>//</span>
-          <Link href="/tickets/resend" class="hover:text-ink transition-colors duration-150">Resend Desk</Link>
         </div>
       </div>
     </footer>

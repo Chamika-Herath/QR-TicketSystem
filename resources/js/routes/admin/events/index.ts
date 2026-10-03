@@ -182,8 +182,85 @@ manualCheckinForm.post = (args: { event: number | { id: number }, attendee: numb
 manualCheckin.form = manualCheckinForm
 
 /**
-* @see \App\Http\Controllers\AdminEventController::exportMethod
+* @see \App\Http\Controllers\AdminEventController::resend
 * @see app/Http/Controllers/AdminEventController.php:266
+* @route '/events/{event}/attendees/{attendee}/resend'
+*/
+export const resend = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: resend.url(args, options),
+    method: 'post',
+})
+
+resend.definition = {
+    methods: ["post"],
+    url: '/events/{event}/attendees/{attendee}/resend',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\AdminEventController::resend
+* @see app/Http/Controllers/AdminEventController.php:266
+* @route '/events/{event}/attendees/{attendee}/resend'
+*/
+resend.url = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions) => {
+    if (Array.isArray(args)) {
+        args = {
+            event: args[0],
+            attendee: args[1],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        event: typeof args.event === 'object'
+        ? args.event.id
+        : args.event,
+        attendee: typeof args.attendee === 'object'
+        ? args.attendee.id
+        : args.attendee,
+    }
+
+    return resend.definition.url
+            .replace('{event}', parsedArgs.event.toString())
+            .replace('{attendee}', parsedArgs.attendee.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\AdminEventController::resend
+* @see app/Http/Controllers/AdminEventController.php:266
+* @route '/events/{event}/attendees/{attendee}/resend'
+*/
+resend.post = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: resend.url(args, options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AdminEventController::resend
+* @see app/Http/Controllers/AdminEventController.php:266
+* @route '/events/{event}/attendees/{attendee}/resend'
+*/
+const resendForm = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: resend.url(args, options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AdminEventController::resend
+* @see app/Http/Controllers/AdminEventController.php:266
+* @route '/events/{event}/attendees/{attendee}/resend'
+*/
+resendForm.post = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: resend.url(args, options),
+    method: 'post',
+})
+
+resend.form = resendForm
+
+/**
+* @see \App\Http\Controllers\AdminEventController::exportMethod
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 export const exportMethod = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -198,7 +275,7 @@ exportMethod.definition = {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 exportMethod.url = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -231,7 +308,7 @@ exportMethod.url = (args: { event: number | { id: number } } | [event: number | 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 exportMethod.get = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -241,7 +318,7 @@ exportMethod.get = (args: { event: number | { id: number } } | [event: number | 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 exportMethod.head = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -251,7 +328,7 @@ exportMethod.head = (args: { event: number | { id: number } } | [event: number |
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 const exportMethodForm = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -261,7 +338,7 @@ const exportMethodForm = (args: { event: number | { id: number } } | [event: num
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 exportMethodForm.get = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -271,7 +348,7 @@ exportMethodForm.get = (args: { event: number | { id: number } } | [event: numbe
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportMethod
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 exportMethodForm.head = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

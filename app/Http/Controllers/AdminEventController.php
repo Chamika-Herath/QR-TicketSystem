@@ -261,6 +261,29 @@ class AdminEventController extends Controller
     }
 
     /**
+     * Resend ticket email to attendee.
+     */
+    public function resendTicket(Request $request, Event $event, Attendee $attendee): RedirectResponse
+    {
+        $isAuthorized = auth()->user()->role === 'admin' 
+            || $event->created_by === auth()->id() 
+            || (auth()->user()->role === 'scanner' && $event->created_by === auth()->user()->created_by);
+
+        if (!$isAuthorized) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $ticket = $attendee->ticket;
+        if (!$ticket) {
+            return back()->withErrors(['error' => 'No ticket found for this attendee.']);
+        }
+
+        \App\Jobs\GenerateAndSendTicket::dispatch($ticket, true);
+
+        return back()->with('success', 'Ticket email has been re-queued for delivery.');
+    }
+
+    /**
      * Export attendees as CSV.
      */
     public function exportCsv(Event $event)
@@ -285,7 +308,7 @@ class AdminEventController extends Controller
             "Expires"             => "0"
         ];
 
-        $columns = ['ID', 'Name', 'Email', 'Phone', 'Ticket Type', 'Ticket Status', 'Check-In Status', 'Scanned At', 'Scanned By'];
+        $columns = ['ID', 'Name', 'Email', 'Phone', 'Ticket Type', 'Ticket Price', 'Ticket Status', 'Check-In Status', 'Scanned At', 'Scanned By'];
 
         $callback = function() use($attendees, $columns) {
             $file = fopen('php://output', 'w');
@@ -301,6 +324,7 @@ class AdminEventController extends Controller
                     $attendee->email,
                     $attendee->phone,
                     $ticket ? $ticket->ticket_type : 'N/A',
+                    $ticket ? $ticket->price : 0,
                     $ticket ? $ticket->status : 'N/A',
                     $checkIn ? 'Checked In' : 'Pending',
                     $checkIn ? $checkIn->scanned_at->format('Y-m-d H:i:s') : '',

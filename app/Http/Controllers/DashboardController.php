@@ -70,11 +70,24 @@ class DashboardController extends Controller
         ->orderBy('hour', 'asc')
         ->get();
 
+        $ticketsByType = Ticket::whereHas('attendee', function ($query) use ($event) {
+            $query->where('event_id', $event->id);
+        })
+        ->select('ticket_type', DB::raw('count(*) as count'), DB::raw('sum(price) as income'))
+        ->groupBy('ticket_type')
+        ->get();
+
+        $totalIncome = Ticket::whereHas('attendee', function ($query) use ($event) {
+            $query->where('event_id', $event->id);
+        })->sum('price');
+
         return response()->json([
             'total_registered' => $totalRegistered,
             'total_checked_in' => $totalCheckedIn,
             'capacity' => $event->capacity,
             'hourly_data' => $checkInsPerHour,
+            'tickets_by_type' => $ticketsByType,
+            'total_income' => $totalIncome,
         ]);
     }
 }

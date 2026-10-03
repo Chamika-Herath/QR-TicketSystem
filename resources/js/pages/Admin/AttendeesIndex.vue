@@ -46,6 +46,12 @@ const manualCheckin = (attendeeId: number) => {
     }
 };
 
+const resendTicket = (attendeeId: number) => {
+    if (confirm('Are you sure you want to resend the ticket email to this attendee?')) {
+        router.post(`/events/${props.event.id}/attendees/${attendeeId}/resend`);
+    }
+};
+
 const deleteAttendee = (attendeeId: number) => {
     if (confirm('Are you sure you want to delete this attendee from the registry? Their ticket will be permanently revoked and they will not be able to check-in.')) {
         router.delete(`/events/${props.event.id}/attendees/${attendeeId}`);
@@ -151,6 +157,13 @@ const formatTime = (timeString: string) => {
                                     </span>
                                 </td>
                                 <td class="p-4 text-right flex items-center justify-end gap-3">
+                                    <button 
+                                        @click="resendTicket(attendee.id)"
+                                        class="font-mono text-[10px] uppercase border border-stub-line hover:border-ink hover:text-ink text-muted px-3 py-1.5 rounded-[4px] transition"
+                                        title="Resend Ticket Email"
+                                    >
+                                        Resend
+                                    </button>
                                     <button 
                                         v-if="!attendee.ticket?.check_in"
                                         @click="manualCheckin(attendee.id)"

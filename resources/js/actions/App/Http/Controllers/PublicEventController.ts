@@ -174,7 +174,7 @@ register.form = registerForm
 
 /**
 * @see \App\Http\Controllers\PublicEventController::showResend
-* @see app/Http/Controllers/PublicEventController.php:104
+* @see app/Http/Controllers/PublicEventController.php:109
 * @route '/tickets/resend'
 */
 export const showResend = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -189,7 +189,7 @@ showResend.definition = {
 
 /**
 * @see \App\Http\Controllers\PublicEventController::showResend
-* @see app/Http/Controllers/PublicEventController.php:104
+* @see app/Http/Controllers/PublicEventController.php:109
 * @route '/tickets/resend'
 */
 showResend.url = (options?: RouteQueryOptions) => {
@@ -198,7 +198,7 @@ showResend.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\PublicEventController::showResend
-* @see app/Http/Controllers/PublicEventController.php:104
+* @see app/Http/Controllers/PublicEventController.php:109
 * @route '/tickets/resend'
 */
 showResend.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -208,7 +208,7 @@ showResend.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\PublicEventController::showResend
-* @see app/Http/Controllers/PublicEventController.php:104
+* @see app/Http/Controllers/PublicEventController.php:109
 * @route '/tickets/resend'
 */
 showResend.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -218,7 +218,7 @@ showResend.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\PublicEventController::showResend
-* @see app/Http/Controllers/PublicEventController.php:104
+* @see app/Http/Controllers/PublicEventController.php:109
 * @route '/tickets/resend'
 */
 const showResendForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -228,7 +228,7 @@ const showResendForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'>
 
 /**
 * @see \App\Http\Controllers\PublicEventController::showResend
-* @see app/Http/Controllers/PublicEventController.php:104
+* @see app/Http/Controllers/PublicEventController.php:109
 * @route '/tickets/resend'
 */
 showResendForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -238,7 +238,7 @@ showResendForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =
 
 /**
 * @see \App\Http\Controllers\PublicEventController::showResend
-* @see app/Http/Controllers/PublicEventController.php:104
+* @see app/Http/Controllers/PublicEventController.php:109
 * @route '/tickets/resend'
 */
 showResendForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -255,7 +255,7 @@ showResend.form = showResendForm
 
 /**
 * @see \App\Http\Controllers\PublicEventController::resend
-* @see app/Http/Controllers/PublicEventController.php:115
+* @see app/Http/Controllers/PublicEventController.php:120
 * @route '/tickets/resend'
 */
 export const resend = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -270,7 +270,7 @@ resend.definition = {
 
 /**
 * @see \App\Http\Controllers\PublicEventController::resend
-* @see app/Http/Controllers/PublicEventController.php:115
+* @see app/Http/Controllers/PublicEventController.php:120
 * @route '/tickets/resend'
 */
 resend.url = (options?: RouteQueryOptions) => {
@@ -279,7 +279,7 @@ resend.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\PublicEventController::resend
-* @see app/Http/Controllers/PublicEventController.php:115
+* @see app/Http/Controllers/PublicEventController.php:120
 * @route '/tickets/resend'
 */
 resend.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -289,7 +289,7 @@ resend.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\PublicEventController::resend
-* @see app/Http/Controllers/PublicEventController.php:115
+* @see app/Http/Controllers/PublicEventController.php:120
 * @route '/tickets/resend'
 */
 const resendForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -299,7 +299,7 @@ const resendForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> =>
 
 /**
 * @see \App\Http\Controllers\PublicEventController::resend
-* @see app/Http/Controllers/PublicEventController.php:115
+* @see app/Http/Controllers/PublicEventController.php:120
 * @route '/tickets/resend'
 */
 resendForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

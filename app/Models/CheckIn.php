@@ -17,6 +17,7 @@ class CheckIn extends Model
         'scanned_by',
         'scanned_at',
         'device_info',
+        'entries',
     ];
 
     protected $casts = [

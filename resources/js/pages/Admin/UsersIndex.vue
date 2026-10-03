@@ -27,6 +27,7 @@ const props = defineProps<{
 
 const isCreateOpen = ref(false);
 const editingUser = ref<any>(null);
+const showPassword = ref(false);
 
 const form = useForm({
     name: '',
@@ -148,7 +149,18 @@ const deleteUser = (id: number) => {
 
                     <div>
                         <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">PASSWORD</label>
-                        <input v-model="form.password" type="password" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" placeholder="MINIMUM 8 CHARACTERS" />
+                        <div class="relative">
+                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'" required class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 pr-10 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" placeholder="MINIMUM 8 CHARACTERS" />
+                            <button
+                                type="button"
+                                @click="showPassword = !showPassword"
+                                class="absolute inset-y-0 right-0 flex items-center px-3 text-muted hover:text-ink focus:outline-none"
+                            >
+                                <span class="font-mono text-[10px] uppercase tracking-tighter">
+                                    {{ showPassword ? 'HIDE' : 'SHOW' }}
+                                </span>
+                            </button>
+                        </div>
                         <p v-if="form.errors.password" class="font-mono text-xs text-stamp uppercase mt-1">{{ form.errors.password }}</p>
                     </div>
 
@@ -199,7 +211,18 @@ const deleteUser = (id: number) => {
 
                     <div>
                         <label class="block font-mono text-[10px] uppercase tracking-wider text-muted mb-2">PASSWORD (LEAVE BLANK TO KEEP UNCHANGED)</label>
-                        <input v-model="editForm.password" type="password" class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" placeholder="NEW PASSWORD" />
+                        <div class="relative">
+                            <input v-model="editForm.password" :type="showPassword ? 'text' : 'password'" class="w-full bg-paper border border-stub-line rounded-[4px] px-4 py-3 pr-10 text-sm text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp" placeholder="NEW PASSWORD" />
+                            <button
+                                type="button"
+                                @click="showPassword = !showPassword"
+                                class="absolute inset-y-0 right-0 flex items-center px-3 text-muted hover:text-ink focus:outline-none"
+                            >
+                                <span class="font-mono text-[10px] uppercase tracking-tighter">
+                                    {{ showPassword ? 'HIDE' : 'SHOW' }}
+                                </span>
+                            </button>
+                        </div>
                         <p v-if="editForm.errors.password" class="font-mono text-xs text-stamp uppercase mt-1">{{ editForm.errors.password }}</p>
                     </div>
 

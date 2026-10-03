@@ -106,7 +106,7 @@ attendees.form = attendeesForm
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroyAttendee
-* @see app/Http/Controllers/AdminEventController.php:320
+* @see app/Http/Controllers/AdminEventController.php:344
 * @route '/events/{event}/attendees/{attendee}'
 */
 export const destroyAttendee = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -121,7 +121,7 @@ destroyAttendee.definition = {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroyAttendee
-* @see app/Http/Controllers/AdminEventController.php:320
+* @see app/Http/Controllers/AdminEventController.php:344
 * @route '/events/{event}/attendees/{attendee}'
 */
 destroyAttendee.url = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions) => {
@@ -151,7 +151,7 @@ destroyAttendee.url = (args: { event: number | { id: number }, attendee: number 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroyAttendee
-* @see app/Http/Controllers/AdminEventController.php:320
+* @see app/Http/Controllers/AdminEventController.php:344
 * @route '/events/{event}/attendees/{attendee}'
 */
 destroyAttendee.delete = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -161,7 +161,7 @@ destroyAttendee.delete = (args: { event: number | { id: number }, attendee: numb
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroyAttendee
-* @see app/Http/Controllers/AdminEventController.php:320
+* @see app/Http/Controllers/AdminEventController.php:344
 * @route '/events/{event}/attendees/{attendee}'
 */
 const destroyAttendeeForm = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -176,7 +176,7 @@ const destroyAttendeeForm = (args: { event: number | { id: number }, attendee: n
 
 /**
 * @see \App\Http\Controllers\AdminEventController::destroyAttendee
-* @see app/Http/Controllers/AdminEventController.php:320
+* @see app/Http/Controllers/AdminEventController.php:344
 * @route '/events/{event}/attendees/{attendee}'
 */
 destroyAttendeeForm.delete = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -269,8 +269,85 @@ manualCheckinForm.post = (args: { event: number | { id: number }, attendee: numb
 manualCheckin.form = manualCheckinForm
 
 /**
-* @see \App\Http\Controllers\AdminEventController::exportCsv
+* @see \App\Http\Controllers\AdminEventController::resendTicket
 * @see app/Http/Controllers/AdminEventController.php:266
+* @route '/events/{event}/attendees/{attendee}/resend'
+*/
+export const resendTicket = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: resendTicket.url(args, options),
+    method: 'post',
+})
+
+resendTicket.definition = {
+    methods: ["post"],
+    url: '/events/{event}/attendees/{attendee}/resend',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\AdminEventController::resendTicket
+* @see app/Http/Controllers/AdminEventController.php:266
+* @route '/events/{event}/attendees/{attendee}/resend'
+*/
+resendTicket.url = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions) => {
+    if (Array.isArray(args)) {
+        args = {
+            event: args[0],
+            attendee: args[1],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        event: typeof args.event === 'object'
+        ? args.event.id
+        : args.event,
+        attendee: typeof args.attendee === 'object'
+        ? args.attendee.id
+        : args.attendee,
+    }
+
+    return resendTicket.definition.url
+            .replace('{event}', parsedArgs.event.toString())
+            .replace('{attendee}', parsedArgs.attendee.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\AdminEventController::resendTicket
+* @see app/Http/Controllers/AdminEventController.php:266
+* @route '/events/{event}/attendees/{attendee}/resend'
+*/
+resendTicket.post = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: resendTicket.url(args, options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AdminEventController::resendTicket
+* @see app/Http/Controllers/AdminEventController.php:266
+* @route '/events/{event}/attendees/{attendee}/resend'
+*/
+const resendTicketForm = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: resendTicket.url(args, options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\AdminEventController::resendTicket
+* @see app/Http/Controllers/AdminEventController.php:266
+* @route '/events/{event}/attendees/{attendee}/resend'
+*/
+resendTicketForm.post = (args: { event: number | { id: number }, attendee: number | { id: number } } | [event: number | { id: number }, attendee: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: resendTicket.url(args, options),
+    method: 'post',
+})
+
+resendTicket.form = resendTicketForm
+
+/**
+* @see \App\Http\Controllers\AdminEventController::exportCsv
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 export const exportCsv = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -285,7 +362,7 @@ exportCsv.definition = {
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportCsv
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 exportCsv.url = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -318,7 +395,7 @@ exportCsv.url = (args: { event: number | { id: number } } | [event: number | { i
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportCsv
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 exportCsv.get = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -328,7 +405,7 @@ exportCsv.get = (args: { event: number | { id: number } } | [event: number | { i
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportCsv
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 exportCsv.head = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -338,7 +415,7 @@ exportCsv.head = (args: { event: number | { id: number } } | [event: number | { 
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportCsv
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 const exportCsvForm = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -348,7 +425,7 @@ const exportCsvForm = (args: { event: number | { id: number } } | [event: number
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportCsv
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 exportCsvForm.get = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -358,7 +435,7 @@ exportCsvForm.get = (args: { event: number | { id: number } } | [event: number |
 
 /**
 * @see \App\Http\Controllers\AdminEventController::exportCsv
-* @see app/Http/Controllers/AdminEventController.php:266
+* @see app/Http/Controllers/AdminEventController.php:289
 * @route '/events/{event}/export'
 */
 exportCsvForm.head = (args: { event: number | { id: number } } | [event: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -780,6 +857,6 @@ destroyForm.delete = (args: { event: number | { id: number } } | [event: number 
 
 destroy.form = destroyForm
 
-const AdminEventController = { attendees, destroyAttendee, manualCheckin, exportCsv, index, store, update, toggleStatus, destroy }
+const AdminEventController = { attendees, destroyAttendee, manualCheckin, resendTicket, exportCsv, index, store, update, toggleStatus, destroy }
 
 export default AdminEventController

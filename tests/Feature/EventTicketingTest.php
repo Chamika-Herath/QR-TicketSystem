@@ -32,6 +32,7 @@ test('public registration generates ticket and dispatches mailable', function ()
         'name' => 'Jane Doe',
         'email' => 'jane@example.com',
         'phone' => '1234567890',
+        'quantity' => 1,
     ]);
 
     $response->assertRedirect();
