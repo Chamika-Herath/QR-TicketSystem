@@ -47,6 +47,12 @@ defineProps<{
             >
               Sign In
             </Link>
+            <Link
+              href="/register"
+              class="font-mono text-xs uppercase bg-stamp text-paper px-3 py-1.5 rounded-[4px] hover:bg-ink tracking-wider transition-colors duration-150"
+            >
+              Register
+            </Link>
           </template>
         </nav>
       </div>
