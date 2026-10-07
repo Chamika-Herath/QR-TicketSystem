@@ -92,53 +92,58 @@ class TicketGeneratorService
                 $font->color('#64748b');
             });
         } else {
-            // Create a gorgeous canvas from scratch (800x400) if no template is uploaded
+            // Create a modern canvas from scratch (800x400)
             $image = $manager->createImage(800, 400);
-            $image->fill('#F7F3EC'); // warm paper
+            $image->fill('#0F172A'); // Slate-900 Dark theme
 
-            // Draw border
+            // Draw accent banner on the left
             $image->drawRectangle(function ($draw) {
-                $draw->at(15, 15);
-                $draw->size(770, 370);
-                $draw->background('#00000000');
-                $draw->border('#1B2430', 2);
+                $draw->at(0, 0);
+                $draw->size(20, 400);
+                $draw->background('#3B82F6'); // Blue-500
             });
 
-            // Draw vertical divider line
+            // Draw white card area for ticket details
+            $image->drawRectangle(function ($draw) {
+                $draw->at(40, 20);
+                $draw->size(500, 360);
+                $draw->background('#1E293B'); // Slate-800
+                $draw->border('#334155', 1); // Slate-700
+            });
+
+            // Draw right stub area
+            $image->drawRectangle(function ($draw) {
+                $draw->at(560, 20);
+                $draw->size(220, 360);
+                $draw->background('#1E293B');
+                $draw->border('#334155', 1);
+            });
+
+            // Draw dashed perforation line
             $image->drawLine(function ($draw) {
-                $draw->from(540, 15);
-                $draw->to(540, 385);
-                $draw->color('#1B2430');
+                $draw->from(550, 20);
+                $draw->to(550, 380);
+                $draw->color('#334155');
                 $draw->width(2);
             });
 
-            // Draw punch hole circles (notches)
+            // Draw decorative dots (modern perforation feel)
             $image->drawCircle(function ($draw) {
-                $draw->at(540, 15);
-                $draw->radius(15);
-                $draw->background('#ffffff');
-                $draw->border('#1B2430', 2);
+                $draw->at(550, 20);
+                $draw->radius(8);
+                $draw->background('#0F172A');
             });
-
             $image->drawCircle(function ($draw) {
-                $draw->at(540, 385);
-                $draw->radius(15);
-                $draw->background('#ffffff');
-                $draw->border('#1B2430', 2);
+                $draw->at(550, 380);
+                $draw->radius(8);
+                $draw->background('#0F172A');
             });
 
-            // Draw decorative lines
+            // Draw decorative separator inside main card
             $image->drawLine(function ($draw) {
-                $draw->from(50, 95);
-                $draw->to(500, 95);
-                $draw->color('#E8E1D3');
-                $draw->width(1);
-            });
-
-            $image->drawLine(function ($draw) {
-                $draw->from(50, 320);
-                $draw->to(500, 320);
-                $draw->color('#E8E1D3');
+                $draw->from(70, 110);
+                $draw->to(510, 110);
+                $draw->color('#334155');
                 $draw->width(1);
             });
 
@@ -148,111 +153,112 @@ class TicketGeneratorService
             $hasCourier = file_exists($courier);
             $hasArial = file_exists($arial);
 
-            // Write event details onto the custom paper ticket
-            $image->text(strtoupper($event->name), 50, 65, function ($font) use ($courier, $hasCourier) {
-                if ($hasCourier) {
-                    $font->file($courier);
-                    $font->size(20);
-                }
-                $font->color('#1B2430');
-            });
-
-            $image->text(strtoupper($attendee->name), 50, 140, function ($font) use ($arial, $hasArial) {
+            // Write event details onto the modern ticket
+            $image->text(strtoupper($event->name), 70, 75, function ($font) use ($arial, $hasArial) {
                 if ($hasArial) {
                     $font->file($arial);
-                    $font->size(28);
+                    $font->size(22);
                 }
-                $font->color('#C4471F'); // stamp orange
+                $font->color('#F8FAFC'); // Slate-50
+            });
+
+            $image->text(strtoupper($attendee->name), 70, 160, function ($font) use ($arial, $hasArial) {
+                if ($hasArial) {
+                    $font->file($arial);
+                    $font->size(26);
+                }
+                $font->color('#38BDF8'); // Sky-400
             });
 
             // VENUE
-            $image->text('VENUE:', 50, 200, function ($font) use ($courier, $hasCourier) {
+            $image->text('VENUE:', 70, 220, function ($font) use ($courier, $hasCourier) {
                 if ($hasCourier) {
                     $font->file($courier);
                     $font->size(13);
                 }
-                $font->color('#8A8577');
+                $font->color('#94A3B8');
             });
-            $image->text(strtoupper($event->venue), 140, 200, function ($font) use ($courier, $hasCourier) {
+            $image->text(strtoupper($event->venue), 180, 220, function ($font) use ($courier, $hasCourier) {
                 if ($hasCourier) {
                     $font->file($courier);
                     $font->size(13);
                 }
-                $font->color('#1B2430');
+                $font->color('#F8FAFC');
             });
 
             // DATE
-            $image->text('DATE/TIME:', 50, 240, function ($font) use ($courier, $hasCourier) {
+            $image->text('DATE/TIME:', 70, 260, function ($font) use ($courier, $hasCourier) {
                 if ($hasCourier) {
                     $font->file($courier);
                     $font->size(13);
                 }
-                $font->color('#8A8577');
+                $font->color('#94A3B8');
             });
-            $image->text(strtoupper($event->starts_at->format('M d, Y h:i A')), 140, 240, function ($font) use ($courier, $hasCourier) {
+            $image->text(strtoupper($event->starts_at->format('M d, Y h:i A')), 180, 260, function ($font) use ($courier, $hasCourier) {
                 if ($hasCourier) {
                     $font->file($courier);
                     $font->size(13);
                 }
-                $font->color('#1B2430');
+                $font->color('#F8FAFC');
             });
 
             // REF
-            $image->text('TICKET REF:', 50, 280, function ($font) use ($courier, $hasCourier) {
+            $image->text('TICKET REF:', 70, 300, function ($font) use ($courier, $hasCourier) {
                 if ($hasCourier) {
                     $font->file($courier);
                     $font->size(13);
                 }
-                $font->color('#8A8577');
+                $font->color('#94A3B8');
             });
-            $image->text(strtoupper(substr($ticket->token, 0, 16)), 180, 280, function ($font) use ($courier, $hasCourier) {
+            $image->text(strtoupper(substr($ticket->token, 0, 16)), 180, 300, function ($font) use ($courier, $hasCourier) {
                 if ($hasCourier) {
                     $font->file($courier);
                     $font->size(13);
                 }
-                $font->color('#C4471F'); // stamp orange
+                $font->color('#38BDF8');
             });
 
             if ($ticket->seat_number) {
-                $image->text('SEAT/STUB:', 50, 320, function ($font) use ($courier, $hasCourier) {
+                $image->text('SEAT/ZONE:', 70, 340, function ($font) use ($courier, $hasCourier) {
                     if ($hasCourier) {
                         $font->file($courier);
                         $font->size(13);
                     }
-                    $font->color('#8A8577');
+                    $font->color('#94A3B8');
                 });
-                $image->text(strtoupper($ticket->seat_number), 180, 320, function ($font) use ($courier, $hasCourier) {
+                $image->text(strtoupper($ticket->seat_number), 180, 340, function ($font) use ($courier, $hasCourier) {
                     if ($hasCourier) {
                         $font->file($courier);
                         $font->size(13);
                     }
-                    $font->color('#1B2430');
+                    $font->color('#F8FAFC');
                 });
             }
 
-            // Right ticket stub details - display ticket type dynamically
-            $image->text(strtoupper($ticket->ticket_type), 580, 65, function ($font) use ($courier, $hasCourier) {
+            // Right ticket stub details
+            $image->text(strtoupper($ticket->ticket_type), 590, 65, function ($font) use ($courier, $hasCourier) {
                 if ($hasCourier) {
                     $font->file($courier);
                     $font->size(12);
                 }
-                $font->color('#8A8577');
+                $font->color('#94A3B8');
             });
 
-            $image->text('[ SCAN ENTRY ]', 580, 340, function ($font) use ($courier, $hasCourier) {
-                if ($hasCourier) {
-                    $font->file($courier);
-                    $font->size(13);
+            // Watermark / Brand on Stub
+            $image->text('Powered by DeepNix software solutions', 570, 360, function ($font) use ($arial, $hasArial) {
+                if ($hasArial) {
+                    $font->file($arial);
+                    $font->size(10);
                 }
-                $font->color('#C4471F');
+                $font->color('#64748B');
             });
 
-            // Draw border around QR code area on the right stub
+            // White box background for QR code to ensure scannability on dark theme
             $image->drawRectangle(function ($draw) {
-                $draw->at(577, 117);
-                $draw->size(166, 166);
-                $draw->background('#00000000');
-                $draw->border('#1B2430', 1);
+                $draw->at(585, 115);
+                $draw->size(170, 170);
+                $draw->background('#FFFFFF');
+                $draw->border('#E2E8F0', 1);
             });
 
             // Place QR Code
