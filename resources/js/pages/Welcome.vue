@@ -67,11 +67,17 @@ defineProps<{
             A vintage-inspired event registration and check-in desk. Attendees get clean, ink-confirmable ticket stubs. Staff check in guests with a single, one-handed mobile scanner.
           </p>
           <div class="flex flex-wrap gap-4 pt-2">
-            <Link
-              href="/login"
+            <a
+              href="#events"
               class="bg-stamp hover:bg-ink text-paper font-mono text-sm uppercase px-6 py-3.5 rounded-[4px] tracking-wider transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-stamp focus:ring-offset-2"
             >
-              Sign In
+              Browse Events
+            </a>
+            <Link
+              href="/tickets/resend"
+              class="border border-stub-line hover:border-ink text-ink font-mono text-sm uppercase px-6 py-3.5 rounded-[4px] tracking-wider transition-colors duration-150 focus:outline-none"
+            >
+              Resend Ticket
             </Link>
           </div>
         </div>
@@ -132,6 +138,28 @@ defineProps<{
               </div>
             </template>
           </TicketStub>
+        </div>
+      </section>
+
+      <!-- Events Section -->
+      <section id="events" class="border-t border-stub-line pt-20">
+        <div class="mb-12">
+          <h2 class="font-display text-4xl uppercase tracking-wider text-ink">UPCOMING EVENTS</h2>
+          <p class="font-body text-sm text-muted mt-2">Find and register for open events.</p>
+        </div>
+
+        <div v-if="events.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <EventCard 
+            v-for="event in events" 
+            :key="event.id"
+            :event="event"
+          />
+        </div>
+        <div v-else class="py-12">
+          <EmptyState 
+            title="NO UPCOMING EVENTS"
+            message="There are currently no public events scheduled. Please check back later."
+          />
         </div>
       </section>
 
