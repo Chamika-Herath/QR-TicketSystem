@@ -139,7 +139,7 @@ class TicketGeneratorService
             // --- TOP BLUE SECTION ---
             
             // Top Watermark
-            $image->text('WWW.DEEPNIX.COM', 400, 70, function ($font) use ($primaryFont) {
+            $image->text('WWW.DEEPNIX.CO', 400, 70, function ($font) use ($primaryFont) {
                 if ($primaryFont) $font->file($primaryFont);
                 $font->size(22);
                 $font->color('#FFFFFF');
