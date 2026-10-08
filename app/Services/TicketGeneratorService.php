@@ -140,7 +140,7 @@ class TicketGeneratorService
                 if ($primaryFont) $font->file($primaryFont);
                 $font->size(22);
                 $font->color('#FFFFFF');
-                $font->align('center', 'middle');
+                $font->align('center', 'center');
             });
 
             // White box for QR code
@@ -161,7 +161,7 @@ class TicketGeneratorService
                 if ($primaryFont) $font->file($primaryFont);
                 $font->size(85);
                 $font->color('#FFFFFF');
-                $font->align('center', 'middle');
+                $font->align('center', 'center');
             });
 
             // Ticket Type & Date
@@ -170,7 +170,7 @@ class TicketGeneratorService
                 if ($primaryFont) $font->file($primaryFont);
                 $font->size(28);
                 $font->color('#FFFFFF');
-                $font->align('center', 'middle');
+                $font->align('center', 'center');
             });
 
             // --- BOTTOM ORANGE SECTION ---
@@ -180,7 +180,7 @@ class TicketGeneratorService
                 if ($primaryFont) $font->file($primaryFont);
                 $font->size(46);
                 $font->color('#2D3748');
-                $font->align('center', 'middle');
+                $font->align('center', 'center');
             });
 
             // Venue
@@ -188,7 +188,7 @@ class TicketGeneratorService
                 if ($primaryFont) $font->file($primaryFont);
                 $font->size(22);
                 $font->color('#2D3748');
-                $font->align('center', 'middle');
+                $font->align('center', 'center');
             });
 
             // Event Sub-Date
@@ -197,7 +197,7 @@ class TicketGeneratorService
                 if ($primaryFont) $font->file($primaryFont);
                 $font->size(22);
                 $font->color('#2D3748');
-                $font->align('center', 'middle');
+                $font->align('center', 'center');
             });
 
             // Details Grid
@@ -262,7 +262,7 @@ class TicketGeneratorService
                 if ($primaryFont) $font->file($primaryFont);
                 $font->size(16);
                 $font->color('#B7791F'); // Darker orange/brown
-                $font->align('center', 'middle');
+                $font->align('center', 'center');
             });
         }
 
