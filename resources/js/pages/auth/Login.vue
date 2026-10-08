@@ -3,7 +3,6 @@ import { Form, Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import { register } from '@/routes';
 
 defineOptions({
     layout: {
@@ -103,9 +102,5 @@ const showPassword = ref(false);
             {{ processing ? 'ACCESS DESK' : 'ACCESS DESK' }}
         </button>
 
-        <div class="text-center font-mono text-[10px] uppercase pt-2 border-t border-dashed border-stub-line">
-            Don't have an account?
-            <Link :href="register()" class="text-stamp hover:text-ink transition-colors ml-1 font-bold">Sign up</Link>
-        </div>
     </Form>
 </template>
