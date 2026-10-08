@@ -67,27 +67,34 @@ class TicketGeneratorService
             $qrImage->resize(150, 150);
             $image->insert($qrImage, 580, 125);
 
-            $image->text($attendee->name, 50, 150, function ($font) {
+            $fontFile = public_path('fonts/Inter-Regular.ttf');
+
+            $image->text($attendee->name, 50, 150, function ($font) use ($fontFile) {
+                $font->file($fontFile);
                 $font->size(32);
                 $font->color('#f8fafc');
             });
 
-            $image->text($event->name, 50, 80, function ($font) {
+            $image->text($event->name, 50, 80, function ($font) use ($fontFile) {
+                $font->file($fontFile);
                 $font->size(24);
                 $font->color('#38bdf8');
             });
 
-            $image->text('Date: ' . $event->starts_at->format('M d, Y h:i A'), 50, 220, function ($font) {
+            $image->text('Date: ' . $event->starts_at->format('M d, Y h:i A'), 50, 220, function ($font) use ($fontFile) {
+                $font->file($fontFile);
                 $font->size(16);
                 $font->color('#94a3b8');
             });
 
-            $image->text('Venue: ' . $event->venue, 50, 260, function ($font) {
+            $image->text('Venue: ' . $event->venue, 50, 260, function ($font) use ($fontFile) {
+                $font->file($fontFile);
                 $font->size(16);
                 $font->color('#94a3b8');
             });
 
-            $image->text('Ticket Token: ' . substr($token, 0, 8) . '...', 50, 320, function ($font) {
+            $image->text('Ticket Token: ' . substr($token, 0, 8) . '...', 50, 320, function ($font) use ($fontFile) {
+                $font->file($fontFile);
                 $font->size(12);
                 $font->color('#64748b');
             });
@@ -125,13 +132,9 @@ class TicketGeneratorService
                 $draw->background('#FFFFFF');
             });
 
-            // Fonts
-            $arial = '/System/Library/Fonts/Supplemental/Arial.ttf';
-            $arialBold = '/System/Library/Fonts/Supplemental/Arial Bold.ttf';
-            $hasArial = file_exists($arial);
-            $hasArialBold = file_exists($arialBold);
-            $primaryFont = $hasArialBold ? $arialBold : ($hasArial ? $arial : null);
-            $secondaryFont = $hasArial ? $arial : null;
+            // Fonts (Use the bundled TTF font to ensure it works on Linux/Hostinger)
+            $primaryFont = public_path('fonts/Inter-Regular.ttf');
+            $secondaryFont = public_path('fonts/Inter-Regular.ttf');
 
             // --- TOP BLUE SECTION ---
             
