@@ -21,7 +21,13 @@ class Ticket extends Model
         'quantity',
         'seat_number',
         'status',
+        'sold_by',
     ];
+
+    public function soldBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sold_by');
+    }
 
     public function attendee(): BelongsTo
     {

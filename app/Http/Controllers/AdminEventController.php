@@ -210,7 +210,7 @@ class AdminEventController extends Controller
         $search = $request->input('search');
 
         $attendees = Attendee::where('event_id', $event->id)
-            ->with(['ticket.checkIn'])
+            ->with(['ticket.checkIn.scanner', 'ticket.soldBy'])
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")

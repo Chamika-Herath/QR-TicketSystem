@@ -95,6 +95,7 @@ class PublicEventController extends Controller
             'quantity' => $requestedQuantity,
             'seat_number' => $seatNumber,
             'status' => 'issued',
+            'sold_by' => auth()->id(),
         ]);
 
         // Dispatch queued background job
