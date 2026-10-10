@@ -132,7 +132,13 @@ const submitManual = async () => {
 onMounted(() => {
     html5QrcodeScanner = new Html5QrcodeScanner(
         "qr-reader",
-        { fps: 10, qrbox: { width: 220, height: 220 } },
+        { 
+            fps: 10, 
+            qrbox: { width: 220, height: 220 },
+            videoConstraints: {
+                facingMode: "environment"
+            }
+        },
         /* verbose= */ false
     );
     html5QrcodeScanner.render(onScanSuccess, onScanFailure);
