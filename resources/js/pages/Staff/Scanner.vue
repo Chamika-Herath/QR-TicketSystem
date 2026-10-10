@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import ScanResultBanner from '@/components/ScanResultBanner.vue';
 
@@ -39,6 +39,37 @@ const selectedQuantity = ref(1);
 let html5QrcodeScanner: Html5QrcodeScanner | null = null;
 const isScanning = ref(true);
 const showManualInput = ref(false);
+const currentFacingMode = ref<'environment' | 'user'>('environment');
+
+const toggleCamera = async () => {
+    currentFacingMode.value = currentFacingMode.value === 'environment' ? 'user' : 'environment';
+    if (html5QrcodeScanner) {
+        try {
+            await html5QrcodeScanner.clear();
+        } catch (e) {
+            console.error("Error clearing scanner", e);
+        }
+        // Small delay to ensure DOM is cleaned up before re-rendering
+        setTimeout(() => {
+            startScanner();
+        }, 300);
+    }
+};
+
+const startScanner = () => {
+    html5QrcodeScanner = new Html5QrcodeScanner(
+        "qr-reader",
+        { 
+            fps: 10, 
+            qrbox: { width: 220, height: 220 },
+            videoConstraints: {
+                facingMode: currentFacingMode.value
+            }
+        },
+        /* verbose= */ false
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+};
 
 const processCheckIn = async (token: string, entries?: number) => {
     try {
@@ -130,18 +161,7 @@ const submitManual = async () => {
 };
 
 onMounted(() => {
-    html5QrcodeScanner = new Html5QrcodeScanner(
-        "qr-reader",
-        { 
-            fps: 10, 
-            qrbox: { width: 220, height: 220 },
-            videoConstraints: {
-                facingMode: "environment"
-            }
-        },
-        /* verbose= */ false
-    );
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    startScanner();
 });
 
 onUnmounted(() => {
@@ -223,6 +243,12 @@ onUnmounted(() => {
             <!-- QR Reader Bounding Box -->
             <div class="w-full bg-paper border border-stub-line rounded-lg p-4 flex flex-col items-center justify-center overflow-hidden">
                 <div id="qr-reader" class="w-full rounded-md overflow-hidden bg-black/5"></div>
+                <button 
+                    @click="toggleCamera"
+                    class="mt-4 w-full bg-background border border-stub-line hover:bg-stub-line text-ink font-mono text-xs uppercase px-4 py-3 rounded-[4px] tracking-wider transition"
+                >
+                    [ SWITCH CAMERA: {{ currentFacingMode === 'environment' ? 'REAR' : 'FRONT' }} ]
+                </button>
             </div>
 
             <!-- Manual Token Fallback Collapsible -->

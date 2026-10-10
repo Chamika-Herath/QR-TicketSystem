@@ -21,9 +21,17 @@ const props = defineProps<{
                 ticket_type: string;
                 seat_number?: string;
                 status: string;
+                sold_by: {
+                    id: number;
+                    name: string;
+                } | null;
                 check_in: {
                     id: number;
                     scanned_at: string;
+                    scanner: {
+                        id: number;
+                        name: string;
+                    } | null;
                 } | null;
             } | null;
         }>;
@@ -141,14 +149,22 @@ const formatTime = (timeString: string) => {
                                     <div v-if="attendee.ticket?.seat_number" class="text-[9px] text-muted mt-1 font-bold">
                                         {{ attendee.ticket.seat_number }}
                                     </div>
+                                    <div v-if="attendee.ticket?.sold_by" class="text-[9px] text-muted mt-0.5">
+                                        SOLD BY: {{ attendee.ticket.sold_by.name.toUpperCase() }}
+                                    </div>
                                 </td>
                                 <td class="p-4">
-                                    <span 
+                                    <div
                                         v-if="attendee.ticket?.check_in" 
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-[4px] text-[10px] font-mono uppercase bg-confirmed/10 text-confirmed border border-confirmed/20"
+                                        class="inline-flex flex-col gap-1 items-start"
                                     >
-                                        Checked In ({{ formatTime(attendee.ticket.check_in.scanned_at) }})
-                                    </span>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-[4px] text-[10px] font-mono uppercase bg-confirmed/10 text-confirmed border border-confirmed/20">
+                                            Checked In ({{ formatTime(attendee.ticket.check_in.scanned_at) }})
+                                        </span>
+                                        <span v-if="attendee.ticket.check_in.scanner" class="text-[9px] text-muted uppercase font-mono pl-1">
+                                            BY: {{ attendee.ticket.check_in.scanner.name }}
+                                        </span>
+                                    </div>
                                     <span 
                                         v-else 
                                         class="inline-flex items-center gap-1.5 px-3 py-1 rounded-[4px] text-[10px] font-mono uppercase bg-stamp/5 text-stamp border border-stamp/20"
