@@ -48,7 +48,7 @@ class TicketGeneratorService
         $qrResult = $builder->build();
 
         $qrBytes = $qrResult->getString();
-        
+
         // Save QR code image
         $qrPath = "public/qrcodes/{$token}.png";
         Storage::put($qrPath, $qrBytes);
@@ -56,12 +56,12 @@ class TicketGeneratorService
 
         // 3. Composite onto Ticket Template using Intervention Image
         $manager = new ImageManager(new Driver());
-        
+
         // Use uploaded template, or create a default rich card template if not provided
         if ($event->ticket_template_path && Storage::exists('public/' . str_replace('storage/', '', $event->ticket_template_path))) {
             $realTemplatePath = Storage::path('public/' . str_replace('storage/', '', $event->ticket_template_path));
             $image = $manager->decode($realTemplatePath);
-            
+
             // Overlay QR code at x=580, y=125 (right aligned card area)
             $qrImage = $manager->decode(Storage::path($qrPath));
             $qrImage->resize(150, 150);
@@ -101,9 +101,9 @@ class TicketGeneratorService
         } else {
             // Create a gorgeous vertical canvas (800x1400)
             $image = $manager->createImage(800, 1400);
-            
+
             // Fill bottom half with Orange/Yellow
-            $image->fill('#FDB849'); 
+            $image->fill('#FDB849');
 
             // Draw Top Blue Section
             $image->drawRectangle(function ($draw) {
@@ -137,14 +137,6 @@ class TicketGeneratorService
             $secondaryFont = public_path('fonts/Inter-Regular.ttf');
 
             // --- TOP BLUE SECTION ---
-            
-            // Top Watermark
-            $image->text('WWW.DEEPNIX.CO', 400, 70, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
-                $font->size(22);
-                $font->color('#FFFFFF');
-                $font->align('center', 'center');
-            });
 
             // White box for QR code
             $image->drawRectangle(function ($draw) {
@@ -161,7 +153,8 @@ class TicketGeneratorService
 
             // "E-TICKET" Text
             $image->text('E-TICKET', 400, 620, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
+                if ($primaryFont)
+                    $font->file($primaryFont);
                 $font->size(85);
                 $font->color('#FFFFFF');
                 $font->align('center', 'center');
@@ -170,7 +163,8 @@ class TicketGeneratorService
             // Ticket Type & Date
             $ticketTypeStr = strtoupper($ticket->ticket_type) . ' - ' . strtoupper($event->starts_at->format('d.m.Y'));
             $image->text($ticketTypeStr, 400, 700, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
+                if ($primaryFont)
+                    $font->file($primaryFont);
                 $font->size(28);
                 $font->color('#FFFFFF');
                 $font->align('center', 'center');
@@ -180,7 +174,8 @@ class TicketGeneratorService
 
             // Event Name
             $image->text(strtoupper($event->name), 400, 930, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
+                if ($primaryFont)
+                    $font->file($primaryFont);
                 $font->size(46);
                 $font->color('#2D3748');
                 $font->align('center', 'center');
@@ -188,7 +183,8 @@ class TicketGeneratorService
 
             // Venue
             $image->text(strtoupper($event->venue), 400, 990, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
+                if ($primaryFont)
+                    $font->file($primaryFont);
                 $font->size(22);
                 $font->color('#2D3748');
                 $font->align('center', 'center');
@@ -197,7 +193,8 @@ class TicketGeneratorService
             // Event Sub-Date
             $eventDateStr = strtoupper($event->starts_at->format('d F Y'));
             $image->text($eventDateStr, 400, 1030, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
+                if ($primaryFont)
+                    $font->file($primaryFont);
                 $font->size(22);
                 $font->color('#2D3748');
                 $font->align('center', 'center');
@@ -213,56 +210,65 @@ class TicketGeneratorService
 
             // Ticket ID
             $image->text('Ticket ID :', $col1, $row1_label, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
+                if ($primaryFont)
+                    $font->file($primaryFont);
                 $font->size(26);
                 $font->color('#2D3748');
             });
             $image->text(substr($ticket->token, 0, 12), $col1, $row1_val, function ($font) use ($secondaryFont) {
-                if ($secondaryFont) $font->file($secondaryFont);
+                if ($secondaryFont)
+                    $font->file($secondaryFont);
                 $font->size(26);
                 $font->color('#4A5568');
             });
 
             // Name
             $image->text('Name :', $col2, $row1_label, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
+                if ($primaryFont)
+                    $font->file($primaryFont);
                 $font->size(26);
                 $font->color('#2D3748');
             });
             $image->text(strtoupper($attendee->name), $col2, $row1_val, function ($font) use ($secondaryFont) {
-                if ($secondaryFont) $font->file($secondaryFont);
+                if ($secondaryFont)
+                    $font->file($secondaryFont);
                 $font->size(26);
                 $font->color('#4A5568');
             });
 
             // Date
             $image->text('Date :', $col1, $row2_label, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
+                if ($primaryFont)
+                    $font->file($primaryFont);
                 $font->size(26);
                 $font->color('#2D3748');
             });
             $image->text($event->starts_at->format('d.m.Y'), $col1, $row2_val, function ($font) use ($secondaryFont) {
-                if ($secondaryFont) $font->file($secondaryFont);
+                if ($secondaryFont)
+                    $font->file($secondaryFont);
                 $font->size(26);
                 $font->color('#4A5568');
             });
 
             // Time & Seat
             $image->text('Time / Seat :', $col2, $row2_label, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
+                if ($primaryFont)
+                    $font->file($primaryFont);
                 $font->size(26);
                 $font->color('#2D3748');
             });
             $seatDisplay = $ticket->seat_number ? (' / ' . strtoupper($ticket->seat_number)) : '';
             $image->text($event->starts_at->format('H:i') . $seatDisplay, $col2, $row2_val, function ($font) use ($secondaryFont) {
-                if ($secondaryFont) $font->file($secondaryFont);
+                if ($secondaryFont)
+                    $font->file($secondaryFont);
                 $font->size(26);
                 $font->color('#4A5568');
             });
 
             // DeepNix Watermark at the very bottom
             $image->text('Powered by DeepNix Software Solutions', 400, 1360, function ($font) use ($primaryFont) {
-                if ($primaryFont) $font->file($primaryFont);
+                if ($primaryFont)
+                    $font->file($primaryFont);
                 $font->size(16);
                 $font->color('#B7791F'); // Darker orange/brown
                 $font->align('center', 'center');
