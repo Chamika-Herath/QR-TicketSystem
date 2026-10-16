@@ -52,6 +52,7 @@ class TicketGeneratorService
         // Save QR code image
         $qrPath = "public/qrcodes/{$token}.png";
         Storage::put($qrPath, $qrBytes);
+        Storage::disk('public')->put("qrcodes/{$token}.png", $qrBytes);
         $ticket->qr_image_path = "storage/qrcodes/{$token}.png";
 
         // 3. Composite onto Ticket Template using Intervention Image
@@ -99,188 +100,108 @@ class TicketGeneratorService
                 $font->color('#64748b');
             });
         } else {
-            // Create a gorgeous vertical canvas (800x1400)
-            $image = $manager->createImage(800, 1400);
+            $tribalTemplatePath = public_path('images/templates/tribal_ticket_template.jpg');
 
-            // Fill bottom half with Orange/Yellow
-            $image->fill('#FDB849');
+            if (file_exists($tribalTemplatePath)) {
+                // Decode the Tribal/African theme background template (768x1376)
+                $image = $manager->decode($tribalTemplatePath);
 
-            // Draw Top Blue Section
-            $image->drawRectangle(function ($draw) {
-                $draw->at(0, 0);
-                $draw->size(800, 750);
-                $draw->background('#13476E');
-            });
+                $boldFont = file_exists(public_path('fonts/Inter-Bold.ttf')) ? public_path('fonts/Inter-Bold.ttf') : null;
+                $regularFont = file_exists(public_path('fonts/Inter-Regular.ttf')) ? public_path('fonts/Inter-Regular.ttf') : null;
 
-            // Draw Blue Triangle pointing downwards
-            $image->drawPolygon(function ($draw) {
-                $draw->point(0, 750);
-                $draw->point(400, 850);
-                $draw->point(800, 750);
-                $draw->background('#13476E');
-            });
+                // 1. Overlay QR code inside the ornate tribal frame (frame center ~ 384, 441)
+                $qrImage = $manager->decode(Storage::path($qrPath));
+                $qrImage->resize(215, 215);
+                $image->insert($qrImage, 277, 333);
 
-            // Draw cutout notches on the sides
-            $image->drawCircle(function ($draw) {
-                $draw->at(0, 750);
-                $draw->radius(25);
-                $draw->background('#FFFFFF');
-            });
-            $image->drawCircle(function ($draw) {
-                $draw->at(800, 750);
-                $draw->radius(25);
-                $draw->background('#FFFFFF');
-            });
+                // 2. Event Name
+                $image->text(strtoupper($event->name), 384, 625, function ($font) use ($boldFont) {
+                    if ($boldFont) $font->file($boldFont);
+                    $font->size(34);
+                    $font->color('#2D1606');
+                    $font->align('center', 'center');
+                });
 
-            // Fonts (Use the bundled TTF font to ensure it works on Linux/Hostinger)
-            $primaryFont = public_path('fonts/Inter-Regular.ttf');
-            $secondaryFont = public_path('fonts/Inter-Regular.ttf');
+                // 3. Attendee Name
+                $image->text(strtoupper($attendee->name), 384, 710, function ($font) use ($boldFont) {
+                    if ($boldFont) $font->file($boldFont);
+                    $font->size(30);
+                    $font->color('#1C1917');
+                    $font->align('center', 'center');
+                });
 
-            // --- TOP BLUE SECTION ---
+                // 4. Event Date & Time
+                $dateStr = strtoupper($event->starts_at->format('d F Y')) . '  •  ' . $event->starts_at->format('h:i A');
+                $image->text($dateStr, 384, 768, function ($font) use ($regularFont) {
+                    if ($regularFont) $font->file($regularFont);
+                    $font->size(22);
+                    $font->color('#5C3A21');
+                    $font->align('center', 'center');
+                });
 
-            // White box for QR code
-            $image->drawRectangle(function ($draw) {
-                $draw->at(200, 120);
-                $draw->size(400, 400);
-                $draw->background('#FFFFFF');
-                $draw->border('#FFFFFF', 2);
-            });
+                // 5. Venue
+                $image->text(strtoupper($event->venue), 384, 818, function ($font) use ($regularFont) {
+                    if ($regularFont) $font->file($regularFont);
+                    $font->size(20);
+                    $font->color('#785032');
+                    $font->align('center', 'center');
+                });
 
-            // Place QR Code
-            $qrImage = $manager->decode(Storage::path($qrPath));
-            $qrImage->resize(380, 380);
-            $image->insert($qrImage, 210, 130);
+                // 6. Ticket Type / Seat Badge
+                $seatInfo = $ticket->seat_number ? ('  •  SEAT ' . strtoupper($ticket->seat_number)) : '';
+                $typeStr = strtoupper($ticket->ticket_type) . $seatInfo;
+                $image->text($typeStr, 384, 880, function ($font) use ($boldFont) {
+                    if ($boldFont) $font->file($boldFont);
+                    $font->size(24);
+                    $font->color('#B43416');
+                    $font->align('center', 'center');
+                });
 
-            // "E-TICKET" Text
-            $image->text('E-TICKET', 400, 620, function ($font) use ($primaryFont) {
-                if ($primaryFont)
-                    $font->file($primaryFont);
-                $font->size(85);
-                $font->color('#FFFFFF');
-                $font->align('center', 'center');
-            });
+                // 7. Bottom Stub Section (below tear-off line)
+                $image->text('TICKET ID : ' . strtoupper(substr($ticket->token, 0, 12)), 384, 1120, function ($font) use ($boldFont) {
+                    if ($boldFont) $font->file($boldFont);
+                    $font->size(22);
+                    $font->color('#2D1606');
+                    $font->align('center', 'center');
+                });
 
-            // Ticket Type & Date
-            $ticketTypeStr = strtoupper($ticket->ticket_type) . ' - ' . strtoupper($event->starts_at->format('d.m.Y'));
-            $image->text($ticketTypeStr, 400, 700, function ($font) use ($primaryFont) {
-                if ($primaryFont)
-                    $font->file($primaryFont);
-                $font->size(28);
-                $font->color('#FFFFFF');
-                $font->align('center', 'center');
-            });
+                $image->text('End of an Era — Farewell 2026', 384, 1160, function ($font) use ($regularFont) {
+                    if ($regularFont) $font->file($regularFont);
+                    $font->size(18);
+                    $font->color('#785032');
+                    $font->align('center', 'center');
+                });
 
-            // --- BOTTOM ORANGE SECTION ---
+                $image->text('Powered by DeepNix', 384, 1200, function ($font) use ($regularFont) {
+                    if ($regularFont) $font->file($regularFont);
+                    $font->size(15);
+                    $font->color('#8B5A2B');
+                    $font->align('center', 'center');
+                });
+            } else {
+                // Fallback canvas if template file is missing
+                $image = $manager->createImage(800, 1400);
+                $image->fill('#FDB849');
+                $image->drawRectangle(function ($draw) {
+                    $draw->at(0, 0);
+                    $draw->size(800, 750);
+                    $draw->background('#13476E');
+                });
 
-            // Event Name
-            $image->text(strtoupper($event->name), 400, 930, function ($font) use ($primaryFont) {
-                if ($primaryFont)
-                    $font->file($primaryFont);
-                $font->size(46);
-                $font->color('#2D3748');
-                $font->align('center', 'center');
-            });
-
-            // Venue
-            $image->text(strtoupper($event->venue), 400, 990, function ($font) use ($primaryFont) {
-                if ($primaryFont)
-                    $font->file($primaryFont);
-                $font->size(22);
-                $font->color('#2D3748');
-                $font->align('center', 'center');
-            });
-
-            // Event Sub-Date
-            $eventDateStr = strtoupper($event->starts_at->format('d F Y'));
-            $image->text($eventDateStr, 400, 1030, function ($font) use ($primaryFont) {
-                if ($primaryFont)
-                    $font->file($primaryFont);
-                $font->size(22);
-                $font->color('#2D3748');
-                $font->align('center', 'center');
-            });
-
-            // Details Grid
-            $col1 = 150;
-            $col2 = 450;
-            $row1_label = 1130;
-            $row1_val = 1170;
-            $row2_label = 1230;
-            $row2_val = 1270;
-
-            // Ticket ID
-            $image->text('Ticket ID :', $col1, $row1_label, function ($font) use ($primaryFont) {
-                if ($primaryFont)
-                    $font->file($primaryFont);
-                $font->size(26);
-                $font->color('#2D3748');
-            });
-            $image->text(substr($ticket->token, 0, 12), $col1, $row1_val, function ($font) use ($secondaryFont) {
-                if ($secondaryFont)
-                    $font->file($secondaryFont);
-                $font->size(26);
-                $font->color('#4A5568');
-            });
-
-            // Name
-            $image->text('Name :', $col2, $row1_label, function ($font) use ($primaryFont) {
-                if ($primaryFont)
-                    $font->file($primaryFont);
-                $font->size(26);
-                $font->color('#2D3748');
-            });
-            $image->text(strtoupper($attendee->name), $col2, $row1_val, function ($font) use ($secondaryFont) {
-                if ($secondaryFont)
-                    $font->file($secondaryFont);
-                $font->size(26);
-                $font->color('#4A5568');
-            });
-
-            // Date
-            $image->text('Date :', $col1, $row2_label, function ($font) use ($primaryFont) {
-                if ($primaryFont)
-                    $font->file($primaryFont);
-                $font->size(26);
-                $font->color('#2D3748');
-            });
-            $image->text($event->starts_at->format('d.m.Y'), $col1, $row2_val, function ($font) use ($secondaryFont) {
-                if ($secondaryFont)
-                    $font->file($secondaryFont);
-                $font->size(26);
-                $font->color('#4A5568');
-            });
-
-            // Time & Seat
-            $image->text('Time / Seat :', $col2, $row2_label, function ($font) use ($primaryFont) {
-                if ($primaryFont)
-                    $font->file($primaryFont);
-                $font->size(26);
-                $font->color('#2D3748');
-            });
-            $seatDisplay = $ticket->seat_number ? (' / ' . strtoupper($ticket->seat_number)) : '';
-            $image->text($event->starts_at->format('H:i') . $seatDisplay, $col2, $row2_val, function ($font) use ($secondaryFont) {
-                if ($secondaryFont)
-                    $font->file($secondaryFont);
-                $font->size(26);
-                $font->color('#4A5568');
-            });
-
-            // DeepNix Watermark at the very bottom
-            $image->text('Powered by DeepNix Software Solutions', 400, 1360, function ($font) use ($primaryFont) {
-                if ($primaryFont)
-                    $font->file($primaryFont);
-                $font->size(16);
-                $font->color('#B7791F'); // Darker orange/brown
-                $font->align('center', 'center');
-            });
+                $qrImage = $manager->decode(Storage::path($qrPath));
+                $qrImage->resize(380, 380);
+                $image->insert($qrImage, 210, 130);
+            }
         }
 
         // Ensure target directories exist
         Storage::makeDirectory('public/tickets');
+        Storage::disk('public')->makeDirectory('tickets');
 
         // Save composite ticket image
         $ticketSavePath = "public/tickets/{$token}.png";
         $image->save(Storage::path($ticketSavePath));
+        $image->save(Storage::disk('public')->path("tickets/{$token}.png"));
         $ticket->ticket_image_path = "storage/tickets/{$token}.png";
         $ticket->save();
 
