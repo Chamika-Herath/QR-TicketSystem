@@ -9,9 +9,13 @@ use App\Http\Controllers\IncomeController;
 
 // Public event routes
 Route::get('/events/{slug}', [PublicEventController::class, 'show'])->name('events.show');
-Route::post('/events/{slug}/register', [PublicEventController::class, 'register'])->name('events.register');
+Route::post('/events/{slug}/register', [PublicEventController::class, 'register'])
+    ->middleware('throttle:10,1')
+    ->name('events.register');
 Route::get('/tickets/resend', [PublicEventController::class, 'showResend'])->name('tickets.resend.show');
-Route::post('/tickets/resend', [PublicEventController::class, 'resend'])->name('tickets.resend');
+Route::post('/tickets/resend', [PublicEventController::class, 'resend'])
+    ->middleware('throttle:6,1')
+    ->name('tickets.resend');
 
 // Staff & Admin Sanctum-protected Dashboard & Scanning routes
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -52,6 +56,7 @@ Route::get('/', function () {
     try {
         $events = \App\Models\Event::where('status', 'published')
             ->orderBy('starts_at', 'asc')
+            ->select(['id', 'name', 'slug', 'description', 'venue', 'starts_at', 'ends_at', 'capacity', 'ticket_types', 'status'])
             ->get();
     } catch (\Throwable $e) {
         $events = collect();
@@ -65,6 +70,7 @@ Route::get('/api/events', function () {
     try {
         $events = \App\Models\Event::where('status', 'published')
             ->orderBy('starts_at', 'asc')
+            ->select(['id', 'name', 'slug', 'description', 'venue', 'starts_at', 'ends_at', 'capacity', 'ticket_types', 'status'])
             ->get();
     } catch (\Throwable $e) {
         $events = collect();

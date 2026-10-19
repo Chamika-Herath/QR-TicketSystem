@@ -35,17 +35,36 @@ const props = defineProps<{
                 } | null;
             } | null;
         }>;
-        links: Array<any>;
+        links: Array<{
+            url: string | null;
+            label: string;
+            active: boolean;
+        }>;
+        current_page: number;
+        last_page: number;
+        from: number | null;
+        to: number | null;
+        total: number;
+        per_page: number;
     };
     filters: {
         search?: string;
+        per_page?: string;
     };
 }>();
 
 const searchVal = ref(props.filters.search || '');
+const perPageVal = ref(props.filters.per_page || '25');
 
-const handleSearch = () => {
-    router.get(`/events/${props.event.id}/attendees`, { search: searchVal.value }, { preserveState: true });
+const handleFilter = () => {
+    router.get(
+        `/events/${props.event.id}/attendees`, 
+        { 
+            search: searchVal.value,
+            per_page: perPageVal.value
+        }, 
+        { preserveState: true, replace: true }
+    );
 };
 
 const manualCheckin = (attendeeId: number) => {
@@ -95,14 +114,25 @@ const formatTime = (timeString: string) => {
                     <div class="relative flex items-center">
                         <input 
                             v-model="searchVal"
-                            @keyup.enter="handleSearch"
+                            @keyup.enter="handleFilter"
                             type="text" 
                             placeholder="SEARCH NAME / EMAIL..." 
                             class="bg-paper border border-stub-line rounded-[4px] px-4 py-2.5 text-xs font-mono uppercase text-ink placeholder-muted/60 focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp w-56" 
                         />
                     </div>
+                    <select
+                        v-model="perPageVal"
+                        @change="handleFilter"
+                        class="bg-paper border border-stub-line rounded-[4px] px-3 py-2.5 text-xs font-mono uppercase text-ink focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp"
+                    >
+                        <option value="15">15 / Page</option>
+                        <option value="25">25 / Page</option>
+                        <option value="50">50 / Page</option>
+                        <option value="100">100 / Page</option>
+                        <option value="all">Show All</option>
+                    </select>
                     <button 
-                        @click="handleSearch" 
+                        @click="handleFilter" 
                         class="bg-ink text-paper hover:bg-stamp hover:text-paper font-mono text-xs uppercase px-4 py-2.5 rounded-[4px] tracking-wider transition-colors duration-150"
                     >
                         Filter
@@ -117,8 +147,8 @@ const formatTime = (timeString: string) => {
             </div>
 
             <!-- Table -->
-            <div class="bg-paper border border-stub-line rounded-lg overflow-hidden">
-                <div class="overflow-x-auto max-h-[600px] scrollbar-thin">
+            <div class="bg-paper border border-stub-line rounded-lg overflow-hidden shadow-sm">
+                <div class="overflow-x-auto scrollbar-thin">
                     <table class="w-full text-left border-collapse">
                         <thead class="sticky top-0 z-10 bg-paper border-b border-stub-line">
                             <tr class="font-mono text-[10px] uppercase text-muted tracking-wider">
@@ -199,12 +229,45 @@ const formatTime = (timeString: string) => {
                                 </td>
                             </tr>
                             <tr v-if="attendees.data.length === 0">
-                                <td colspan="5" class="p-16 text-center text-muted font-mono text-xs uppercase">
+                                <td colspan="6" class="p-16 text-center text-muted font-mono text-xs uppercase">
                                     [ No attendee registrations found ]
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Pagination Footer -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-stub-line bg-paper/50 text-xs font-mono">
+                    <div class="text-muted uppercase text-[11px]">
+                        Showing <span class="font-bold text-ink">{{ attendees.from || 0 }}</span> to <span class="font-bold text-ink">{{ attendees.to || 0 }}</span> of <span class="font-bold text-stamp">{{ attendees.total }}</span> registered attendees
+                    </div>
+
+                    <!-- Page navigation buttons -->
+                    <div v-if="attendees.links && attendees.links.length > 3" class="flex flex-wrap items-center gap-1">
+                        <template v-for="(link, i) in attendees.links" :key="i">
+                            <Link
+                                v-if="link.url"
+                                :href="link.url"
+                                :class="[
+                                    'px-3 py-1.5 rounded-[4px] border font-mono text-[11px] uppercase transition-colors',
+                                    link.active 
+                                        ? 'bg-stamp text-paper border-stamp font-bold shadow-sm' 
+                                        : 'border-stub-line text-muted hover:border-ink hover:text-ink bg-paper'
+                                ]"
+                                v-html="link.label"
+                                preserve-scroll
+                            />
+                            <span
+                                v-else
+                                :class="[
+                                    'px-3 py-1.5 rounded-[4px] border border-stub-line/40 text-muted/40 font-mono text-[11px] uppercase cursor-not-allowed',
+                                    link.active ? 'bg-stamp/10 font-bold' : ''
+                                ]"
+                                v-html="link.label"
+                            />
+                        </template>
+                    </div>
                 </div>
             </div>
 

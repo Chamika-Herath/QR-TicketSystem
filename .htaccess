@@ -1,4 +1,18 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Prevent dual path prefix by redirecting /public/* to /* (Finding F10)
+    RewriteCond %{THE_REQUEST} /public/([^\s?]*) [NC]
+    RewriteRule ^ %1 [L,NE,R=301]
+
+    # Block access to hidden files (.env, .git, etc.)
+    RewriteRule ^\. - [F,L]
+
+    # Block access to sensitive source directories and files
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests|vendor)(/.*)?$ - [F,L]
+    RewriteRule ^(artisan|composer\.(json|lock)|package(-lock)?\.json|\.env.*)$ - [F,L]
+
+    # Rewrite all other requests to the public directory
+    RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

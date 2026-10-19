@@ -208,8 +208,9 @@ class AdminEventController extends Controller
         }
 
         $search = $request->input('search');
+        $perPageInput = $request->input('per_page', '25');
 
-        $attendees = Attendee::where('event_id', $event->id)
+        $query = Attendee::where('event_id', $event->id)
             ->with(['ticket.checkIn.scanner', 'ticket.soldBy'])
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -217,14 +218,24 @@ class AdminEventController extends Controller
                       ->orWhere('email', 'like', "%{$search}%");
                 });
             })
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
+            ->latest();
+
+        if ($perPageInput === 'all') {
+            $totalCount = (clone $query)->count();
+            $perPage = max(1, $totalCount);
+        } else {
+            $perPage = max(10, min(500, (int) $perPageInput));
+        }
+
+        $attendees = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/AttendeesIndex', [
             'event' => $event,
             'attendees' => $attendees,
-            'filters' => $request->only(['search']),
+            'filters' => [
+                'search' => $search,
+                'per_page' => (string) $perPageInput,
+            ],
         ]);
     }
 
@@ -289,8 +300,7 @@ class AdminEventController extends Controller
     public function exportCsv(Event $event)
     {
         $isAuthorized = auth()->user()->role === 'admin' 
-            || $event->created_by === auth()->id() 
-            || (auth()->user()->role === 'scanner' && $event->created_by === auth()->user()->created_by);
+            || (auth()->user()->role === 'staff' && $event->created_by === auth()->id());
 
         if (!$isAuthorized) {
             abort(403, 'Unauthorized action.');

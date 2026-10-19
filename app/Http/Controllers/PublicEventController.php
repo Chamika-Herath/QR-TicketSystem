@@ -11,6 +11,9 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\RedirectResponse;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 class PublicEventController extends Controller
 {
     /**
@@ -20,6 +23,18 @@ class PublicEventController extends Controller
     {
         $event = Event::where('slug', $slug)
             ->where('status', 'published')
+            ->select([
+                'id',
+                'name',
+                'slug',
+                'description',
+                'venue',
+                'starts_at',
+                'ends_at',
+                'capacity',
+                'ticket_types',
+                'status',
+            ])
             ->firstOrFail();
 
         return Inertia::render('Public/EventLanding', [
@@ -45,19 +60,33 @@ class PublicEventController extends Controller
         $allowedTypes = $event->ticket_types ?? [['name' => 'General Admission', 'capacity' => $event->capacity]];
         $allowedNames = collect($allowedTypes)->pluck('name')->toArray();
 
-        if (!$request->has('ticket_type')) {
+        if (!$request->filled('ticket_type')) {
             $request->merge(['ticket_type' => $allowedNames[0] ?? 'General Admission']);
         }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:attendees,email,NULL,id,event_id,' . $event->id,
+            'email' => 'required|email|max:255',
             'phone' => 'required|string|max:20',
             'ticket_type' => ['required', 'string', \Illuminate\Validation\Rule::in($allowedNames)],
             'quantity' => 'required|integer|min:1|max:10',
-        ], [
-            'email.unique' => 'You are already registered for this event with this email address.',
         ]);
+
+        // Check if attendee is already registered (Neutralize F3c enumeration oracle & prevent duplicates)
+        $existingAttendee = Attendee::where('event_id', $event->id)
+            ->where('email', $validated['email'])
+            ->first();
+
+        if ($existingAttendee) {
+            if ($existingAttendee->ticket) {
+                try {
+                    GenerateAndSendTicket::dispatch($existingAttendee->ticket, true);
+                } catch (\Throwable $e) {
+                    Log::warning('Resend to existing attendee failed: ' . $e->getMessage());
+                }
+            }
+            return back()->with('success', 'Registration details received! If already registered, your digital ticket has been resent to your email.');
+        }
 
         $chosenType = $validated['ticket_type'];
         $requestedQuantity = $validated['quantity'];
@@ -73,35 +102,45 @@ class PublicEventController extends Controller
         }
 
         $seatNumber = strtoupper($chosenType) . '-' . ($registeredCount + 1);
-
-        $attendee = Attendee::create([
-            'event_id' => $event->id,
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'],
-        ]);
-
-        do {
-            $token = \Illuminate\Support\Str::random(32);
-        } while (Ticket::where('token', $token)->exists());
-
         $unitPrice = $categoryConfig ? ($categoryConfig['price'] ?? 0) : 0;
 
-        $ticket = Ticket::create([
-            'attendee_id' => $attendee->id,
-            'token' => $token,
-            'ticket_type' => $chosenType,
-            'price' => $unitPrice * $requestedQuantity,
-            'quantity' => $requestedQuantity,
-            'seat_number' => $seatNumber,
-            'status' => 'issued',
-            'sold_by' => auth()->id(),
-        ]);
+        try {
+            $ticket = DB::transaction(function () use ($event, $validated, $chosenType, $unitPrice, $requestedQuantity, $seatNumber) {
+                $attendee = Attendee::create([
+                    'event_id' => $event->id,
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                    'phone' => $validated['phone'],
+                ]);
 
-        // Dispatch queued background job
-        GenerateAndSendTicket::dispatch($ticket);
+                do {
+                    $token = \Illuminate\Support\Str::random(32);
+                } while (Ticket::where('token', $token)->exists());
 
-        return back()->with('success', 'Registration successful! Your ticket is being generated and will be emailed shortly.');
+                return Ticket::create([
+                    'attendee_id' => $attendee->id,
+                    'token' => $token,
+                    'ticket_type' => $chosenType,
+                    'price' => $unitPrice * $requestedQuantity,
+                    'quantity' => $requestedQuantity,
+                    'seat_number' => $seatNumber,
+                    'status' => 'issued',
+                    'sold_by' => auth()->id(),
+                ]);
+            });
+        } catch (\Throwable $e) {
+            Log::error('Registration creation transaction failed: ' . $e->getMessage());
+            return back()->withErrors(['email' => 'Registration could not be completed. Please try again.']);
+        }
+
+        // Safely dispatch queued background email job without letting SMTP failures crash HTTP request
+        try {
+            GenerateAndSendTicket::dispatch($ticket);
+        } catch (\Throwable $e) {
+            Log::warning('GenerateAndSendTicket dispatch failed: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Registration successful! Your digital ticket has been generated and sent to your email.');
     }
 
     /**
@@ -129,13 +168,16 @@ class PublicEventController extends Controller
             ->where('email', $validated['email'])
             ->first();
 
-        if (!$attendee || !$attendee->ticket) {
-            return back()->withErrors(['email' => 'No registration found for this email address and event.']);
+        if ($attendee && $attendee->ticket) {
+            try {
+                // Dispatch queued job with isResend = true
+                GenerateAndSendTicket::dispatch($attendee->ticket, true);
+            } catch (\Throwable $e) {
+                Log::warning('Resend ticket dispatch failed: ' . $e->getMessage());
+            }
         }
 
-        // Dispatch queued job with isResend = true
-        GenerateAndSendTicket::dispatch($attendee->ticket, true);
-
-        return back()->with('success', 'Ticket email has been re-queued for delivery.');
+        // Uniform response prevents attendee enumeration (closing F3 oracle and preventing F13 error disclosure)
+        return back()->with('success', 'If this email address is registered for this event, your ticket has been resent to your inbox.');
     }
 }

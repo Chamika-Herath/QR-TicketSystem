@@ -49,7 +49,7 @@ const handleLogout = () => {
         </div>
 
         <!-- Navigation Links -->
-        <div class="flex-1 py-8 px-4 space-y-2">
+        <div v-if="page.props.auth?.user" class="flex-1 py-8 px-4 space-y-2">
             <template v-for="item in mainNavItems" :key="item.title">
                 <Link
                     v-if="!(page.props.auth?.user?.role === 'scanner' && (item.title === 'DASHBOARD' || item.title === 'INCOME'))"
@@ -79,9 +79,10 @@ const handleLogout = () => {
                 <span>USERS</span>
             </Link>
         </div>
+        <div v-else class="flex-1 py-8 px-4"></div>
 
         <!-- Footer / User profile & logout -->
-        <div class="p-6 border-t border-dashed border-stub-line space-y-4">
+        <div v-if="page.props.auth?.user" class="p-6 border-t border-dashed border-stub-line space-y-4">
             <div class="flex flex-col">
                 <span class="font-display text-base uppercase text-ink truncate">
                     {{ page.props.auth?.user?.name }}
